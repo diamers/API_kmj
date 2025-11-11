@@ -8,6 +8,7 @@ $role = $data["role"] ?? "";
 $username = $data["username"] ?? null;
 $email = $data["email"] ?? null;
 $password = $data["password"] ?? null;
+$full_name = $data["full_name"] ?? null;
 $provider_type = $data["provider_type"] ?? "local";
 $provider_id = $data["provider_id"] ?? null;
 
@@ -18,8 +19,8 @@ if (!$role) {
 }
 
 if (in_array($role, ["owner", "admin"])) {
-    if (!$username || !$email || !$password) {
-        echo json_encode(["status" => "error", "message" => "Username, email, dan password wajib diisi"]);
+    if (!$username || !$email || !$password || !$full_name) {
+        echo json_encode(["status" => "error", "message" => "Nama lengkap, username, email, dan password wajib diisi"]);
         exit;
     }
     $hashed = password_hash($password, PASSWORD_BCRYPT);
@@ -56,10 +57,10 @@ if ($kodeQuery && $row = $kodeQuery->fetch_assoc()) {
 // Insert data baru
 $stmt = $conn->prepare("
     INSERT INTO users 
-    (kode_user, username, email, password, role, provider_type, provider_id, email_verified)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+    (kode_user, username, email, password, full_name, role, provider_type, provider_id, email_verified)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
 ");
-$stmt->bind_param("sssssss", $kode_user, $username, $email, $hashed, $role, $provider_type, $provider_id);
+$stmt->bind_param("ssssssss", $kode_user, $username, $email, $hashed, $full_name, $role, $provider_type, $provider_id);
 
 if ($stmt->execute()) {
     echo json_encode([
