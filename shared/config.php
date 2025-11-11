@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "maverick_kmj";
+$db   = "kmjshowroom";
 $port = 3306;
 header('Content-Type: application/json');
 
