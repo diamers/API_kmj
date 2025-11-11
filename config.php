@@ -1,9 +1,9 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
+$host = "127.0.0.1";
+$user = "admin";
+$pass = "1234";
 $db   = "maverick_kmj";
-$port = 3306;
+$port = 8889;
 header('Content-Type: application/json');
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
