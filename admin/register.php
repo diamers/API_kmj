@@ -1,5 +1,6 @@
 <?php
-require "config.php";
+header('Content-Type: application/json');
+require __DIR__ . "/../shared/config.php";
 
 // Ambil data JSON dari body
 $data = json_decode(file_get_contents("php://input"), true);

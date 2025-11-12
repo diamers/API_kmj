@@ -1,5 +1,6 @@
 <?php
-require "config.php";
+header('Content-Type: application/json');
+require __DIR__ . "/../shared/config.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 $identifier = $data["identifier"] ?? null; // bisa email atau username
@@ -37,6 +38,7 @@ if ($provider_type == "local") {
             "user" => [
                 "kode_user" => $user["kode_user"],
                 "username" => $user["username"],
+                "full_name" => $user["full_name"],
                 "email" => $user["email"],
                 "role" => $user["role"],
                 "provider_type" => $user["provider_type"]
