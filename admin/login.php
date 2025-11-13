@@ -33,8 +33,9 @@ if ($provider_type == "local") {
         $update->execute();
 
         echo json_encode([
+            "code" => 200,
             "status" => "success",
-            "message" => "Login berhasil",
+            "message" => "Selamat, Login berhasil",
             "user" => [
                 "kode_user" => $user["kode_user"],
                 "username" => $user["username"],
