@@ -1,0 +1,16 @@
+<?php
+require '/Applications/MAMP/htdocs/api_kmj/vendor/autoload.php';
+require '/Applications/MAMP/htdocs/api_kmj/shared/send_mail.php'; // pastikan path-nya sesuai
+
+// data dummy untuk tes
+$to_email = "diamersherdi@gmail.com"; // ganti ke email kamu
+$nama_user = "Herdi";
+$otp = rand(100000, 999999);
+
+// panggil fungsi
+$result = sendVerificationEmail($to_email, $nama_user, $otp);
+
+// tampilkan hasil
+echo "<pre>";
+print_r($result);
+echo "</pre>";

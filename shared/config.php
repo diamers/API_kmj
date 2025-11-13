@@ -12,5 +12,5 @@ if ($conn->connect_error) {
     die(json_encode(["success"=>false,"message"=>"DB gagal: " . $conn->connect_error]));
 }
 
-echo json_encode(["success"=>true,"message"=>"Koneksi berhasil"]);
+// echo json_encode(["success"=>true,"message"=>"Koneksi berhasil"]);
 ?>
