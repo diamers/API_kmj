@@ -1,5 +1,6 @@
 <?php
-require "config.php";
+header('Content-Type: application/json');
+require __DIR__ . "/../shared/config.php";
 
 $query = $conn->query("SELECT COUNT(*) as user_count FROM users");
 $result = $query->fetch_assoc();
