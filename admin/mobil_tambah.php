@@ -33,6 +33,20 @@ try {
     if (empty($kodeMobil))
       throw new Exception("Kode mobil wajib diisi untuk delete.");
 
+    // 🔥 PERUBAHAN: ambil dulu semua path foto yang mau dihapus
+    $fotoPaths = [];
+    $stmt = $conn->prepare("SELECT nama_file FROM mobil_foto WHERE kode_mobil = ?");
+    $stmt->bind_param("s", $kodeMobil);
+    $stmt->execute();
+    $resFoto = $stmt->get_result();
+    while ($row = $resFoto->fetch_assoc()) {
+      if (!empty($row['nama_file'])) {
+        $fotoPaths[] = $row['nama_file'];
+      }
+    }
+    $stmt->close();
+    // 🔥 PERUBAHAN SELESAI
+
     $conn->begin_transaction();
     try {
       // Hapus relasi (mobil_foto dan mobil_fitur)
@@ -46,6 +60,24 @@ try {
 
       $conn->commit();
 
+      // 🔥 PERUBAHAN: hapus file fisik di uploads/mobil
+      $projectRoot = dirname(__DIR__, 2); // (project root)
+      foreach ($fotoPaths as $path) {
+        // pastikan ini URL path saja
+        $filePath = parse_url($path, PHP_URL_PATH);
+        if ($filePath === null || $filePath === false) {
+          $filePath = $path;
+        }
+
+        if (strpos($filePath, '/uploadsImage_kmj/mobil/') === 0) {
+          $full = $projectRoot . $filePath;
+          if (is_file($full)) {
+            @unlink($full);
+          }
+        }
+      }
+      // 🔥 PERUBAHAN SELESAI
+
       echo json_encode([
         'success' => true,
         'code' => 200,
@@ -57,6 +89,7 @@ try {
       throw $ex;
     }
   }
+
 
   // ===================== DATA UMUM =====================
   $data = [
@@ -73,25 +106,16 @@ try {
     'warna_exterior' => $_POST['warna_exterior'] ?? '',
     'status' => $_POST['status'] ?? 'available'
   ];
-  // ananta ngekomen 2 baris di bawah
-  // $fitur = $_POST['fitur'] ?? [];
-  // $fotoList = $_POST['foto'] ?? [];
-// di ganti berikut
+
   $fitur = $_POST['fitur'] ?? [];
-  // Awalnya coba ambil dari POST (dipakai oleh mobile app)
   $fotoList = $_POST['foto'] ?? [];
 
   // =============== HANDLE UPLOAD FILE DARI WEB ADMIN ===============
-  // Kalau dari web admin: $_POST['foto'] biasanya kosong,
-  // tapi $_FILES berisi foto_360, foto_depan, dst.
   if (empty($fotoList) && !empty($_FILES)) {
     $fotoList = [];
 
-    // Folder fisik tempat simpan file
     $projectRoot = dirname(__DIR__, 2);
 
-    // Base URL yang nantinya disimpan di DB
-    // dan dipakai <img src="...">
     $uploadDir = $projectRoot . '/uploadsImage_kmj/mobil/';
     if (!is_dir($uploadDir)) {
       mkdir($uploadDir, 0775, true);
@@ -216,17 +240,25 @@ try {
       $stmt->close();
 
       // ===================== FOTO (smart update) =====================
+      // ===================== FOTO (smart update) =====================
       if (!empty($fotoList)) {
-        // Ambil id foto lama
+        // 🔥 PERUBAHAN: Ambil id + nama_file lama
         $existingIds = [];
-        $res = $conn->query("SELECT id_foto FROM mobil_foto WHERE kode_mobil='$kodeMobil'");
+        $existingFiles = []; // [id_foto => nama_file_lama]
+
+        $res = $conn->query("SELECT id_foto, nama_file FROM mobil_foto WHERE kode_mobil='$kodeMobil'");
         while ($r = $res->fetch_assoc()) {
-          $existingIds[] = (int) $r['id_foto'];
+          $id = (int) $r['id_foto'];
+          $existingIds[] = $id;
+          $existingFiles[$id] = $r['nama_file'];
         }
 
         $stmtUpdate = $conn->prepare("UPDATE mobil_foto SET tipe_foto=?, nama_file=?, urutan=? WHERE id_foto=?");
         $stmtInsert = $conn->prepare("INSERT INTO mobil_foto (kode_mobil, tipe_foto, nama_file, urutan) VALUES (?, ?, ?, ?)");
         $idsInRequest = [];
+
+        // 🔥 PERUBAHAN: array untuk file yang perlu dihapus fisiknya
+        $filesToDelete = [];
 
         foreach ($fotoList as $foto) {
           $id = $foto['id_foto'] ?? null;
@@ -236,25 +268,57 @@ try {
           $urut = (int) ($foto['urutan'] ?? 0);
 
           if ($id && in_array($id, $existingIds)) {
+            // kalau ada id_foto, berarti mode UPDATE 1 baris
+
+            // cek apakah nama_file diganti
+            $oldFile = $existingFiles[$id] ?? null;
+            if ($oldFile && $file && $file !== $oldFile) {
+              $filesToDelete[] = $oldFile; // hapus file lama setelah commit
+            }
+
             $stmtUpdate->bind_param("ssii", $tipe, $file, $urut, $id);
             $stmtUpdate->execute();
             $idsInRequest[] = $id;
           } else {
+            // INSERT baris foto baru
             $stmtInsert->bind_param("sssi", $kodeMobil, $tipe, $file, $urut);
             $stmtInsert->execute();
             $idsInRequest[] = $conn->insert_id;
           }
         }
 
-        // Hapus foto yang tidak dikirim
+        // Hapus foto yang tidak dikirim (baris DB + file)
         $toDelete = array_diff($existingIds, $idsInRequest);
         if (!empty($toDelete)) {
+          // tambahkan file lama ke list penghapusan
+          foreach ($toDelete as $idDel) {
+            if (!empty($existingFiles[$idDel])) {
+              $filesToDelete[] = $existingFiles[$idDel];
+            }
+          }
+
           $in = implode(',', array_map('intval', $toDelete));
           $conn->query("DELETE FROM mobil_foto WHERE id_foto IN ($in)");
         }
 
         $stmtUpdate->close();
         $stmtInsert->close();
+
+        // 🔥 PERUBAHAN: hapus file fisik setelah DB commit
+        $projectRoot = dirname(__DIR__, 2);
+        foreach ($filesToDelete as $path) {
+          $filePath = parse_url($path, PHP_URL_PATH);
+          if ($filePath === null || $filePath === false) {
+            $filePath = $path;
+          }
+          if (strpos($filePath, '/uploadsImage_kmj/mobil/') === 0) {
+            $full = $projectRoot . $filePath;
+            if (is_file($full)) {
+              @unlink($full);
+            }
+          }
+        }
+        // 🔥 PERUBAHAN SELESAI
       }
 
       $conn->commit();
