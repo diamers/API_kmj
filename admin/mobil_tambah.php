@@ -69,7 +69,7 @@ try {
           $filePath = $path;
         }
 
-        if (strpos($filePath, '/uploadsImage_kmj/mobil/') === 0) {
+        if (strpos($filePath, '/API_KMJ/images/mobil/') === 0) {
           $full = $projectRoot . $filePath;
           if (is_file($full)) {
             @unlink($full);
@@ -116,11 +116,11 @@ try {
 
     $projectRoot = dirname(__DIR__, 2);
 
-    $uploadDir = $projectRoot . '/uploadsImage_kmj/mobil/';
+    $uploadDir = $projectRoot . '/API_KMJ/images/mobil/';
     if (!is_dir($uploadDir)) {
       mkdir($uploadDir, 0775, true);
     }
-    $publicBase = '/uploadsImage_kmj/mobil/';
+    $publicBase = '/API_KMJ/images/mobil/';
 
     // Helper untuk 1 file (360, depan, belakang, samping)
     $addSingle = function ($field, $tipe, $urutanStart) use (&$fotoList, $uploadDir, $publicBase) {
@@ -311,7 +311,7 @@ try {
           if ($filePath === null || $filePath === false) {
             $filePath = $path;
           }
-          if (strpos($filePath, '/uploadsImage_kmj/mobil/') === 0) {
+          if (strpos($filePath, '/API_KMJ/images/mobil/') === 0) {
             $full = $projectRoot . $filePath;
             if (is_file($full)) {
               @unlink($full);
