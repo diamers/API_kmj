@@ -1,0 +1,22 @@
+Array
+(
+    [kode_user] => US001
+    [nama_mobil] => bmw q
+    [tahun] => 2020
+    [jarak_tempuh] => 20000
+    [tipe_kendaraan] => MPV
+    [bahan_bakar] => Bensin
+    [sistem_penggerak] => FWD
+    [warna_exterior] => red
+    [warna_interior] => black
+    [angsuran] => 22222
+    [tenor] => 2
+    [uang_muka] => 22222
+    [fitur] => Array
+        (
+            [0] => 27
+            [1] => 30
+        )
+
+    [status] => available
+)
