@@ -1,6 +1,11 @@
 <?php
-require "../shared/config.php";
+require __DIR__ . "/../shared/config.php";
+require_once __DIR__ . "/../shared/path.php";
 header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
 
 // Ambil input JSON atau POST
 $input = json_decode(file_get_contents('php://input'), true);
@@ -69,7 +74,7 @@ try {
           $filePath = $path;
         }
 
-        if (strpos($filePath, '/API_KMJ/images/mobil/') === 0) {
+        if (strpos($filePath, '/../images/mobil/') === 0) {
           $full = $projectRoot . $filePath;
           if (is_file($full)) {
             @unlink($full);
@@ -114,13 +119,13 @@ try {
   if (empty($fotoList) && !empty($_FILES)) {
     $fotoList = [];
 
-    $projectRoot = dirname(__DIR__, 2);
+    $uploadDir = API_UPLOAD_DIR;
+    $publicBase = API_PUBLIC_PATH;
 
-    $uploadDir = $projectRoot . '/API_KMJ/images/mobil/';
     if (!is_dir($uploadDir)) {
       mkdir($uploadDir, 0775, true);
     }
-    $publicBase = '/API_KMJ/images/mobil/';
+    $publicBase = '/images/mobil/';
 
     // Helper untuk 1 file (360, depan, belakang, samping)
     $addSingle = function ($field, $tipe, $urutanStart) use (&$fotoList, $uploadDir, $publicBase) {
@@ -143,8 +148,8 @@ try {
           'urutan' => $urutanStart,
         ];
         $urutanStart++;
-      }
-
+      } 
+      
       return $urutanStart;
     };
 
@@ -311,7 +316,7 @@ try {
           if ($filePath === null || $filePath === false) {
             $filePath = $path;
           }
-          if (strpos($filePath, '/API_KMJ/images/mobil/') === 0) {
+          if (strpos($filePath, '/images/mobil/') === 0) {
             $full = $projectRoot . $filePath;
             if (is_file($full)) {
               @unlink($full);
