@@ -1,22 +1,24 @@
 Array
 (
     [kode_user] => US001
-    [nama_mobil] => bmw q
+    [update] => 1
+    [kode_mobil] => MB00000001
+    [nama_mobil] => adrian hidayat
     [tahun] => 2020
-    [jarak_tempuh] => 20000
-    [tipe_kendaraan] => MPV
+    [jarak_tempuh] => 8
+    [tipe_kendaraan] => SUV
     [bahan_bakar] => Bensin
     [sistem_penggerak] => FWD
-    [warna_exterior] => red
-    [warna_interior] => black
-    [angsuran] => 22222
-    [tenor] => 2
-    [uang_muka] => 22222
+    [warna_exterior] => Black
+    [warna_interior] => Gray
+    [angsuran] => 2319000
+    [tenor] => 9
+    [uang_muka] => 4000
     [fitur] => Array
         (
-            [0] => 27
-            [1] => 30
+            [0] => 4
+            [1] => 42
         )
 
-    [status] => available
+    [status] => sold
 )

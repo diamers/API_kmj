@@ -65,22 +65,24 @@ try {
 
       $conn->commit();
 
-      // 🔥 PERUBAHAN: hapus file fisik di uploads/mobil
-      $projectRoot = dirname(__DIR__, 2); // (project root)
+      // 🔥 PERUBAHAN: hapus file fisik di images/mobil
+      // __DIR__ = .../API_KMJ/admin  → dirname(__DIR__) = .../API_KMJ
+      $projectRoot = dirname(__DIR__);
       foreach ($fotoPaths as $path) {
-        // pastikan ini URL path saja
         $filePath = parse_url($path, PHP_URL_PATH);
         if ($filePath === null || $filePath === false) {
           $filePath = $path;
         }
 
-        if (strpos($filePath, '/../images/mobil/') === 0) {
-          $full = $projectRoot . $filePath;
+        if (strpos($filePath, '/images/mobil/') === 0) {
+          $full = $projectRoot . $filePath;  // .../API_KMJ/images/mobil/xxx.jpg
           if (is_file($full)) {
             @unlink($full);
           }
         }
       }
+
+
       // 🔥 PERUBAHAN SELESAI
 
       echo json_encode([
@@ -148,8 +150,8 @@ try {
           'urutan' => $urutanStart,
         ];
         $urutanStart++;
-      } 
-      
+      }
+
       return $urutanStart;
     };
 
@@ -245,7 +247,6 @@ try {
       $stmt->close();
 
       // ===================== FOTO (smart update) =====================
-      // ===================== FOTO (smart update) =====================
       if (!empty($fotoList)) {
         // 🔥 PERUBAHAN: Ambil id + nama_file lama
         $existingIds = [];
@@ -310,14 +311,14 @@ try {
         $stmtInsert->close();
 
         // 🔥 PERUBAHAN: hapus file fisik setelah DB commit
-        $projectRoot = dirname(__DIR__, 2);
+        $projectRoot = dirname(__DIR__);
         foreach ($filesToDelete as $path) {
           $filePath = parse_url($path, PHP_URL_PATH);
           if ($filePath === null || $filePath === false) {
             $filePath = $path;
           }
           if (strpos($filePath, '/images/mobil/') === 0) {
-            $full = $projectRoot . $filePath;
+            $full = $projectRoot . $filePath; // .../API_KMJ/images/mobil/xxx.jpg
             if (is_file($full)) {
               @unlink($full);
             }
