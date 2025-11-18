@@ -1,0 +1,168 @@
+=== UPLOAD DEBUG ===
+projectRoot: 
+uploadDir: /Applications/MAMP/htdocs/api_kmj/images/mobil/
+_FILES: Array
+(
+    [foto_360] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [foto_depan] => Array
+        (
+            [name] => mobil.jpg
+            [full_path] => mobil.jpg
+            [type] => image/jpeg
+            [tmp_name] => /Applications/MAMP/tmp/php/phpZAOf8s
+            [error] => 0
+            [size] => 10502
+        )
+
+    [foto_belakang] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [foto_samping] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [foto_tambahan] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+is_dir(uploadDir): YES
+is_writable(uploadDir): YES
+BERHASIL: foto_depan => /Applications/MAMP/htdocs/api_kmj/images/mobil/mobil_6919b79df40053.18404536.jpg
+=== UPLOAD DEBUG ===
+projectRoot: 
+uploadDir: /Applications/MAMP/htdocs/api_kmj/images/mobil/
+_FILES: Array
+(
+    [foto_360] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [foto_depan] => Array
+        (
+            [name] => mobil.jpg
+            [full_path] => mobil.jpg
+            [type] => image/jpeg
+            [tmp_name] => /Applications/MAMP/tmp/php/phpf4Gs0O
+            [error] => 0
+            [size] => 10502
+        )
+
+    [foto_belakang] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [foto_samping] => Array
+        (
+            [name] => 
+            [full_path] => 
+            [type] => 
+            [tmp_name] => 
+            [error] => 4
+            [size] => 0
+        )
+
+    [foto_tambahan] => Array
+        (
+            [name] => Array
+                (
+                    [0] => 
+                )
+
+            [full_path] => Array
+                (
+                    [0] => 
+                )
+
+            [type] => Array
+                (
+                    [0] => 
+                )
+
+            [tmp_name] => Array
+                (
+                    [0] => 
+                )
+
+            [error] => Array
+                (
+                    [0] => 4
+                )
+
+            [size] => Array
+                (
+                    [0] => 0
+                )
+
+        )
+
+)
+
+is_dir(uploadDir): YES
+is_writable(uploadDir): YES
+BERHASIL: foto_depan => /Applications/MAMP/htdocs/api_kmj/images/mobil/mobil_6919b7a5204bd1.80439972.jpg
