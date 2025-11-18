@@ -1,11 +1,8 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-// TODO: SESUAIKAN PATH INI DENGAN PUNYAMU
-// kalau sebelumnya berhasil pakai "../shared/config.php", pakai itu
-require_once __DIR__ . '/../shared/config.php';
+require '/../shared/config.php';
 
-// Gabungkan semua sumber input (GET, POST, JSON body)
 $raw = json_decode(file_get_contents('php://input'), true) ?: [];
 $req = array_merge($_GET ?? [], $_POST ?? [], $raw ?? []);
 
@@ -17,9 +14,7 @@ function json_error($msg, $code = 400) {
     exit;
 }
 
-/* =========================================================
- *  LIST TRANSAKSI  (GET ?action=list)
- * =======================================================*/
+//get list
 if ($action === 'list') {
 
     $sql = "
@@ -54,9 +49,7 @@ if ($action === 'list') {
     exit;
 }
 
-/* =========================================================
- *  DETAIL TRANSAKSI  (GET ?action=detail&id=TRX...)
- * =======================================================*/
+//get detail
 if ($action === 'detail') {
     $kode = trim($req['id'] ?? '');
     if ($kode === '') {
@@ -100,9 +93,7 @@ if ($action === 'detail') {
     exit;
 }
 
-/* =========================================================
- *  CREATE TRANSAKSI  (POST JSON {action:"create", ...})
- * =======================================================*/
+//post create
 if ($action === 'create') {
     $nama_pembeli    = trim($req['nama_pembeli'] ?? '');
     $no_hp           = trim($req['no_hp'] ?? '');
@@ -191,7 +182,4 @@ if ($action === 'create') {
     exit;
 }
 
-/* =========================================================
- *  FALLBACK
- * =======================================================*/
 json_error('Action tidak valid', 400);
