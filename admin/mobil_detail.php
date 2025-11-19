@@ -15,9 +15,7 @@ if (!$kode_mobil) {
 try {
     // Ambil info utama
     $query = "
-        SELECT 
-            kode_mobil, nama_mobil, tahun, warna, bahan_bakar, jarak_tempuh,
-            harga_cicilan, angsuran, dp, status
+        SELECT *
         FROM mobil
         WHERE kode_mobil = '$kode_mobil'
     ";
@@ -33,7 +31,7 @@ try {
 
     // Ambil foto mobil
     $qFoto = "
-        SELECT id_foto, foto, tipe
+        SELECT id_foto, tipe_foto, nama_file AS foto
         FROM mobil_foto 
         WHERE kode_mobil = '$kode_mobil'
     ";
@@ -42,13 +40,13 @@ try {
     $resultFoto = $conn->query($qFoto);
 
     while ($f = $resultFoto->fetch_assoc()) {
-        $f["foto"] = BASE_URL . "/shared/img/" . $f["foto"];
+        $f["foto"] = BASE_URL . "/images/mobil/" . $f["foto"];
         $fotoList[] = $f;
     }
 
     // Ambil fitur mobil
     $qFitur = "
-        SELECT fitur_id
+        SELECT Id_fitur AS fitur_id
         FROM mobil_fitur
         WHERE kode_mobil = '$kode_mobil'
     ";

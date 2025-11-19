@@ -12,6 +12,7 @@ try {
             m.tipe_bahan_bakar,
             m.jarak_tempuh,
             m.angsuran,
+            m.tenor,
             m.uang_muka AS dp,
             m.status,
             mf.nama_file AS foto
@@ -29,7 +30,7 @@ try {
 
         // Kolom nama_file sudah berbentuk /API_KMJ/images/mobil/abc.jpg
         if (!empty($row['foto'])) {
-            $row['foto'] = BASE_URL . "/shared/images/mobil/" . $row['foto'];
+            $row['foto'] = BASE_URL . "/images/mobil/" . $row['foto'];
         } else {
             $row['foto'] = null;
         }
@@ -39,12 +40,14 @@ try {
     }
 
     echo json_encode([
+        "code" => 200,
         "success" => true,
         "data" => $data
     ]);
 
 } catch (Exception $e) {
     echo json_encode([
+        "code" => 500,
         "success" => false,
         "message" => $e->getMessage()
     ]);
