@@ -1,12 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-require '/../shared/config.php';
-
-$raw = json_decode(file_get_contents('php://input'), true) ?: [];
-$req = array_merge($_GET ?? [], $_POST ?? [], $raw ?? []);
-
-$action = $req['action'] ?? '';
+require '../shared/config.php';
 
 function json_error($msg, $code = 400) {
     http_response_code($code);
@@ -14,102 +9,37 @@ function json_error($msg, $code = 400) {
     exit;
 }
 
-//get list
-if ($action === 'list') {
-
-    $sql = "
-      SELECT 
-        t.kode_transaksi,
-        t.nama_pembeli,
-        m.nama_mobil,
-        t.created_at AS tanggal,
-        t.status,
-        t.harga_akhir,
-        u.full_name AS kasir
-      FROM transaksi t
-      LEFT JOIN mobil  m ON t.kode_mobil = m.kode_mobil
-      LEFT JOIN users  u ON t.kode_user  = u.kode_user
-      ORDER BY t.created_at DESC
-    ";
-
-    $result = $conn->query($sql);
-    if (!$result) {
-        json_error('Gagal mengambil data transaksi: ' . $conn->error, 500);
-    }
-
-    $rows = [];
-    while ($row = $result->fetch_assoc()) {
-        $rows[] = $row;
-    }
-
-    echo json_encode([
-        'status' => 'success',
-        'data'   => $rows,
-    ]);
-    exit;
+// Pastikan cuma boleh POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    json_error('Method tidak diizinkan, gunakan POST', 405);
 }
 
-//get detail
-if ($action === 'detail') {
-    $kode = trim($req['id'] ?? '');
-    if ($kode === '') {
-        json_error('Kode transaksi tidak dikirim');
-    }
+// Ambil dari POST + JSON body
+$raw = json_decode(file_get_contents('php://input'), true) ?: [];
+$req = array_merge($_POST ?? [], $raw ?? []);
 
-    $sql = "SELECT
-              t.kode_transaksi,
-              t.nama_pembeli,
-              t.no_hp,
-              t.tipe_pembayaran,
-              t.harga_akhir,
-              t.created_at,
-              t.status,
-              m.nama_mobil,
-              m.tahun_mobil,
-              u.full_name AS kasir
-            FROM transaksi t
-            LEFT JOIN mobil m ON t.kode_mobil = m.kode_mobil
-            LEFT JOIN users u ON t.kode_user = u.kode_user
-            WHERE t.kode_transaksi = ?";
+$action = $req['action'] ?? 'create'; // default create kalau mau
 
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        json_error('Gagal prepare query: '.$conn->error, 500);
-    }
-
-    $stmt->bind_param('s', $kode);
-    $stmt->execute();
-    $data = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    if (!$data) {
-        json_error('Data transaksi tidak ditemukan', 404);
-    }
-
-    echo json_encode([
-        'status' => 'success',
-        'data'   => $data,
-    ]);
-    exit;
-}
-
-//post create
+// ================== POST CREATE ==================
 if ($action === 'create') {
     $nama_pembeli    = trim($req['nama_pembeli'] ?? '');
     $no_hp           = trim($req['no_hp'] ?? '');
     $tipe_pembayaran = trim($req['tipe_pembayaran'] ?? '');
     $tipe_pembayaran = strtolower($tipe_pembayaran);
+    $note            = trim($req['note'] ?? '');
+
     $mapPembayaran = [
-        'tunai'      => 'cash',
-        'cash'       => 'cash',
-        'kredit'     => 'kredit',
-        'credit'     => 'kredit',
+        'tunai'  => 'cash',
+        'cash'   => 'cash',
+        'kredit' => 'kredit',
+        'credit' => 'kredit',
     ];
     if (isset($mapPembayaran[$tipe_pembayaran])) {
         $tipe_pembayaran = $mapPembayaran[$tipe_pembayaran];
     } else {
         $tipe_pembayaran = 'cash';
     }
+
     $harga_akhir     = $req['harga_akhir'] ?? null;
     $kode_mobil      = trim($req['kode_mobil'] ?? '');
     $kode_user       = trim($req['kode_user'] ?? '');
@@ -147,8 +77,8 @@ if ($action === 'create') {
 
     // INSERT
     $sql = "INSERT INTO transaksi
-            (kode_transaksi, nama_pembeli, no_hp, tipe_pembayaran, harga_akhir, kode_mobil, kode_user, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+            (kode_transaksi, nama_pembeli, no_hp, tipe_pembayaran, harga_akhir, kode_mobil, kode_user, status, note, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
@@ -156,7 +86,7 @@ if ($action === 'create') {
     }
 
     $stmt->bind_param(
-        'ssssisss',
+        'ssssissss',
         $kode_transaksi,
         $nama_pembeli,
         $no_hp,
@@ -164,7 +94,8 @@ if ($action === 'create') {
         $harga_akhir,
         $kode_mobil,
         $kode_user,
-        $status
+        $status,
+        $note
     );
 
     if (!$stmt->execute()) {
@@ -182,4 +113,4 @@ if ($action === 'create') {
     exit;
 }
 
-json_error('Action tidak valid', 400);
+json_error('Action tidak valid untuk POST', 400);
