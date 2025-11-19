@@ -1,24 +1,42 @@
 Array
 (
     [kode_user] => US001
-    [update] => 1
-    [kode_mobil] => MB00000001
-    [nama_mobil] => adrian hidayat
+    [nama_mobil] => Toyota Alphard
     [tahun] => 2020
-    [jarak_tempuh] => 8
-    [tipe_kendaraan] => SUV
-    [bahan_bakar] => Bensin
+    [jarak_tempuh] => 15000
+    [full_prize] => 900000000
+    [uang_muka] => 150000000
+    [tenor] => 48
+    [angsuran] => 20000000
+    [tipe_kendaraan] => MPV
     [sistem_penggerak] => FWD
-    [warna_exterior] => Black
-    [warna_interior] => Gray
-    [angsuran] => 2319000
-    [tenor] => 9
-    [uang_muka] => 4000
+    [bahan_bakar] => Bensin
+    [warna_interior] => Hitam
+    [warna_exterior] => Putih
+    [status] => available
     [fitur] => Array
         (
-            [0] => 4
-            [1] => 42
+            [0] => 1
+            [1] => 2
+            [2] => 4
         )
 
-    [status] => sold
+    [foto] => Array
+        (
+            [0] => Array
+                (
+                    [tipe_foto] => depan
+                    [nama_file] => /images/mobil/depan1.jpg
+                    [urutan] => 1
+                )
+
+            [1] => Array
+                (
+                    [tipe_foto] => belakang
+                    [nama_file] => /images/mobil/belakang1.jpg
+                    [urutan] => 2
+                )
+
+        )
+
 )

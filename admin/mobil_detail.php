@@ -40,7 +40,7 @@ try {
     $resultFoto = $conn->query($qFoto);
 
     while ($f = $resultFoto->fetch_assoc()) {
-        $f["foto"] = BASE_URL . "/images/mobil/" . $f["foto"];
+        $f["foto"] = BASE_URL . $f["foto"];
         $fotoList[] = $f;
     }
 

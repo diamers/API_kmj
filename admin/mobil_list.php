@@ -11,6 +11,7 @@ try {
             m.warna_exterior,
             m.tipe_bahan_bakar,
             m.jarak_tempuh,
+            m.full_prize,
             m.angsuran,
             m.tenor,
             m.uang_muka AS dp,
@@ -30,7 +31,7 @@ try {
 
         // Kolom nama_file sudah berbentuk /API_KMJ/images/mobil/abc.jpg
         if (!empty($row['foto'])) {
-            $row['foto'] = BASE_URL . "/images/mobil/" . $row['foto'];
+            $row['foto'] = BASE_URL . $row['foto'];
         } else {
             $row['foto'] = null;
         }
