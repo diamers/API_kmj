@@ -8,7 +8,8 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 
 // Ambil input JSON atau POST
 $input = json_decode(file_get_contents('php://input'), true);
-if ($input) $_POST = $input;
+if ($input)
+    $_POST = $input;
 
 file_put_contents("debug_user.txt", print_r($_POST, true));
 
@@ -23,7 +24,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 }
 
 // Helper: agar bisa bind_param dinamis dengan call_user_func_array
-function refValues($arr) {
+function refValues($arr)
+{
     // untuk PHP yang membutuhkan reference array
     $refs = [];
     foreach ($arr as $k => $v) {
@@ -42,7 +44,8 @@ try {
 
     // ===================== DELETE MOBIL =====================
     if ($deleteMode) {
-        if (empty($kodeMobil)) throw new Exception("Kode mobil wajib diisi untuk delete.");
+        if (empty($kodeMobil))
+            throw new Exception("Kode mobil wajib diisi untuk delete.");
 
         // ambil dulu semua path foto yang mau dihapus
         $fotoPaths = [];
@@ -51,7 +54,8 @@ try {
         $stmt->execute();
         $resFoto = $stmt->get_result();
         while ($row = $resFoto->fetch_assoc()) {
-            if (!empty($row['nama_file'])) $fotoPaths[] = $row['nama_file'];
+            if (!empty($row['nama_file']))
+                $fotoPaths[] = $row['nama_file'];
         }
         $stmt->close();
 
@@ -72,10 +76,12 @@ try {
             $projectRoot = dirname(__DIR__);
             foreach ($fotoPaths as $path) {
                 $filePath = parse_url($path, PHP_URL_PATH);
-                if ($filePath === null || $filePath === false) $filePath = $path;
+                if ($filePath === null || $filePath === false)
+                    $filePath = $path;
                 if (strpos($filePath, '/images/mobil/') === 0) {
                     $full = $projectRoot . $filePath;
-                    if (is_file($full)) @unlink($full);
+                    if (is_file($full))
+                        @unlink($full);
                 }
             }
 
@@ -118,14 +124,17 @@ try {
         $uploadDir = API_UPLOAD_DIR;
         $publicBase = API_PUBLIC_PATH;
 
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0775, true);
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir, 0775, true);
         $publicBase = '/images/mobil/';
 
         // Helper untuk 1 file (360, depan, belakang, samping)
         $addSingle = function ($field, $tipe, $urutanStart) use (&$fotoList, $uploadDir, $publicBase) {
-            if (!isset($_FILES[$field])) return $urutanStart;
+            if (!isset($_FILES[$field]))
+                return $urutanStart;
             $f = $_FILES[$field];
-            if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] <= 0) return $urutanStart;
+            if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] <= 0)
+                return $urutanStart;
             $ext = pathinfo($f['name'], PATHINFO_EXTENSION);
             $newName = uniqid('mobil_', true) . '.' . strtolower($ext);
             $dest = rtrim($uploadDir, '/\\') . DIRECTORY_SEPARATOR . $newName;
@@ -142,12 +151,15 @@ try {
 
         // Helper untuk multiple file (foto_tambahan[])
         $addMultiple = function ($field, $tipe, $urutanStart) use (&$fotoList, $uploadDir, $publicBase) {
-            if (!isset($_FILES[$field])) return $urutanStart;
+            if (!isset($_FILES[$field]))
+                return $urutanStart;
             $f = $_FILES[$field];
-            if (!is_array($f['name'])) return $urutanStart;
+            if (!is_array($f['name']))
+                return $urutanStart;
             $count = count($f['name']);
             for ($i = 0; $i < $count; $i++) {
-                if ($f['error'][$i] !== UPLOAD_ERR_OK || $f['size'][$i] <= 0) continue;
+                if ($f['error'][$i] !== UPLOAD_ERR_OK || $f['size'][$i] <= 0)
+                    continue;
                 $ext = pathinfo($f['name'][$i], PATHINFO_EXTENSION);
                 $newName = uniqid('mobil_', true) . '.' . strtolower($ext);
                 $dest = rtrim($uploadDir, '/\\') . DIRECTORY_SEPARATOR . $newName;
@@ -174,7 +186,8 @@ try {
 
     // ===================== UPDATE MOBIL =====================
     if ($updateMode) {
-        if (empty($kodeMobil)) throw new Exception("Kode mobil wajib diisi untuk update.");
+        if (empty($kodeMobil))
+            throw new Exception("Kode mobil wajib diisi untuk update.");
 
         $conn->begin_transaction();
         try {
@@ -185,12 +198,14 @@ try {
             $old = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-            if (!$old) throw new Exception("Mobil dengan kode $kodeMobil tidak ditemukan.");
+            if (!$old)
+                throw new Exception("Mobil dengan kode $kodeMobil tidak ditemukan.");
 
             // Gunakan nilai baru jika dikirim, jika tidak gunakan nilai lama
             foreach ($data as $k => &$v) {
                 if (!isset($_POST[$k]) || $_POST[$k] === "") {
-                    if (isset($old[$k])) $v = $old[$k];
+                    if (isset($old[$k]))
+                        $v = $old[$k];
                 }
             }
 
@@ -237,6 +252,22 @@ try {
             $stmt->execute();
             $stmt->close();
 
+            // // ===================== FITUR (replace) =====================
+            $stmt = $conn->prepare("DELETE FROM mobil_fitur WHERE kode_mobil = ?");
+            $stmt->bind_param("s", $kodeMobil);
+            $stmt->execute();
+            $stmt->close();
+
+            if (!empty($fitur) && is_array($fitur)) {
+                $stmt = $conn->prepare("INSERT INTO mobil_fitur (kode_mobil, id_fitur) VALUES (?, ?)");
+                foreach ($fitur as $idFitur) {
+                    $idFitur = (int) $idFitur;
+                    $stmt->bind_param("si", $kodeMobil, $idFitur);
+                    $stmt->execute();
+                }
+                $stmt->close();
+            }
+
             // ===================== FOTO (smart update) =====================
             if (!empty($fotoList)) {
                 // Ambil id + nama_file lama
@@ -262,7 +293,8 @@ try {
 
                     if ($id && in_array($id, $existingIds)) {
                         $oldFile = $existingFiles[$id] ?? null;
-                        if ($oldFile && $file && $file !== $oldFile) $filesToDelete[] = $oldFile;
+                        if ($oldFile && $file && $file !== $oldFile)
+                            $filesToDelete[] = $oldFile;
                         $stmtUpdate->bind_param("ssii", $tipe, $file, $urut, $id);
                         $stmtUpdate->execute();
                         $idsInRequest[] = $id;
@@ -277,7 +309,8 @@ try {
                 $toDelete = array_diff($existingIds, $idsInRequest);
                 if (!empty($toDelete)) {
                     foreach ($toDelete as $idDel) {
-                        if (!empty($existingFiles[$idDel])) $filesToDelete[] = $existingFiles[$idDel];
+                        if (!empty($existingFiles[$idDel]))
+                            $filesToDelete[] = $existingFiles[$idDel];
                     }
                     $in = implode(',', array_map('intval', $toDelete));
                     $conn->query("DELETE FROM mobil_foto WHERE id_foto IN ($in)");
@@ -290,10 +323,12 @@ try {
                 $projectRoot = dirname(__DIR__);
                 foreach ($filesToDelete as $path) {
                     $filePath = parse_url($path, PHP_URL_PATH);
-                    if ($filePath === null || $filePath === false) $filePath = $path;
+                    if ($filePath === null || $filePath === false)
+                        $filePath = $path;
                     if (strpos($filePath, '/images/mobil/') === 0) {
                         $full = $projectRoot . $filePath;
-                        if (is_file($full)) @unlink($full);
+                        if (is_file($full))
+                            @unlink($full);
                     }
                 }
             }
@@ -315,7 +350,8 @@ try {
 
     // ===================== INSERT MOBIL BARU =====================
     $resKode = $conn->query("SELECT generate_kode_mobil() AS kode");
-    if (!$resKode) throw new Exception("Gagal mengambil kode mobil: " . $conn->error);
+    if (!$resKode)
+        throw new Exception("Gagal mengambil kode mobil: " . $conn->error);
     $kodeMobilBaru = $resKode->fetch_assoc()['kode'];
 
     $conn->begin_transaction();
