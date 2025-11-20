@@ -2,7 +2,7 @@
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "maverick_kmj";
+$dbname = "kmjshowrooms";
 $port = 3306;
 
 header('Content-Type: application/json');
@@ -13,7 +13,7 @@ if ($conn->connect_error) {
     die(json_encode(["success" => false, "message" => "DB gagal: " . $conn->connect_error]));
 }
 
-define("BASE_URL", "http://10.10.185.25:80/API_kmj");
+define("BASE_URL", "http://localhost:80/API_kmj");
 
 try {
     $pdo = new PDO(

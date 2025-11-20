@@ -1,42 +1,5 @@
 Array
 (
-    [kode_user] => US001
-    [nama_mobil] => Toyota Alphard
-    [tahun] => 2020
-    [jarak_tempuh] => 15000
-    [full_prize] => 900000000
-    [uang_muka] => 150000000
-    [tenor] => 48
-    [angsuran] => 20000000
-    [tipe_kendaraan] => MPV
-    [sistem_penggerak] => FWD
-    [bahan_bakar] => Bensin
-    [warna_interior] => Hitam
-    [warna_exterior] => Putih
-    [status] => available
-    [fitur] => Array
-        (
-            [0] => 1
-            [1] => 2
-            [2] => 4
-        )
-
-    [foto] => Array
-        (
-            [0] => Array
-                (
-                    [tipe_foto] => depan
-                    [nama_file] => /images/mobil/depan1.jpg
-                    [urutan] => 1
-                )
-
-            [1] => Array
-                (
-                    [tipe_foto] => belakang
-                    [nama_file] => /images/mobil/belakang1.jpg
-                    [urutan] => 2
-                )
-
-        )
-
+    [delete] => 1
+    [kode_mobil] => MB00000001
 )
