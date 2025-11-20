@@ -388,18 +388,18 @@ try {
                 }
 
                 // ⬇⬇⬇ HANYA HAPUS FOTO LAMA JIKA REQUEST MEMBAWA id_foto (artinya UI mengatur ulang list lengkap)
-                if ($hasExistingId) {
-                    $toDelete = array_diff($existingIds, $idsInRequest);
-                    if (!empty($toDelete)) {
-                        foreach ($toDelete as $idDel) {
-                            if (!empty($existingFiles[$idDel])) {
-                                $filesToDelete[] = $existingFiles[$idDel];
-                            }
-                        }
-                        $in = implode(',', array_map('intval', $toDelete));
-                        $conn->query("DELETE FROM mobil_foto WHERE id_foto IN ($in)");
-                    }
-                }
+                // if ($hasExistingId) {
+                //     $toDelete = array_diff($existingIds, $idsInRequest);
+                //     if (!empty($toDelete)) {
+                //         foreach ($toDelete as $idDel) {
+                //             if (!empty($existingFiles[$idDel])) {
+                //                 $filesToDelete[] = $existingFiles[$idDel];
+                //             }
+                //         }
+                //         $in = implode(',', array_map('intval', $toDelete));
+                //         $conn->query("DELETE FROM mobil_foto WHERE id_foto IN ($in)");
+                //     }
+                // }
 
                 $stmtUpdate->close();
                 $stmtInsert->close();
