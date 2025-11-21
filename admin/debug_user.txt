@@ -1,24 +1,22 @@
 Array
 (
     [kode_user] => US001
-    [update] => 1
-    [kode_mobil] => MB00000001
-    [nama_mobil] => adrian hidayat
-    [tahun] => 2020
-    [jarak_tempuh] => 8
+    [nama_mobil] => Toyota Supra
+    [tahun] => 2025
+    [jarak_tempuh] => 200000
     [tipe_kendaraan] => SUV
-    [bahan_bakar] => Bensin
+    [bahan_bakar] => Diesel
     [sistem_penggerak] => FWD
-    [warna_exterior] => Black
-    [warna_interior] => Gray
-    [angsuran] => 2319000
-    [tenor] => 9
-    [uang_muka] => 4000
+    [warna_exterior] => red
+    [warna_interior] => black
+    [angsuran] => 20000
+    [tenor] => 2
+    [uang_muka] => 222000
     [fitur] => Array
         (
-            [0] => 4
-            [1] => 42
+            [0] => 1
+            [1] => 4
         )
 
-    [status] => sold
+    [status] => available
 )
