@@ -3,6 +3,15 @@ require __DIR__ . "/../shared/config.php";
 require_once __DIR__ . "/../shared/path.php";
 header("Content-Type: application/json");
 
+$response = [
+    "code" => 400,
+    "success" => false,
+    "message" => "Terjadi kesalahan",
+    "mobil" => null,
+    "fitur" => [],
+    "foto" => []
+];
+
 // Ambil kode_mobil
 $kode = $_GET["kode_mobil"] ?? "";
 
@@ -76,8 +85,10 @@ try {
         // Convert nama_file → full URL
         if (!empty($row['nama_file'])) {
             // jika masih /images/mobil/xxx.jpg → jadikan URL lengkap
-            if (strpos($row['nama_file'], "http://") === false &&
-                strpos($row['nama_file'], "https://") === false) {
+            if (
+                strpos($row['nama_file'], "http://") === false &&
+                strpos($row['nama_file'], "https://") === false
+            ) {
 
                 $path = $row['nama_file'];
 
@@ -94,16 +105,16 @@ try {
     // ============================
     // 4. RETURN JSON
     // ============================
-    echo json_encode([
-        "success" => true,
-        "mobil"   => $mobil,
-        "fitur"   => $fitur,
-        "foto"    => $foto
-    ]);
+    $response["code"] = 200;
+    $response["success"] = true;
+    $response["message"] = "OK";
+    $response["mobil"] = $mobil;
+    $response["fitur"] = $fitur;
+    $response["foto"] = $foto;
 
 } catch (Exception $e) {
-    echo json_encode([
-        "success" => false,
-        "message" => $e->getMessage()
-    ]);
+    $response["code"] = 400;
+    $response["message"] = $e->getMessage();
 }
+
+echo json_encode($response);

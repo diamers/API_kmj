@@ -1,6 +1,14 @@
 <?php
-require "../shared/config.php"; // koneksi + BASE_URL
+require "../shared/config.php"; 
 header("Content-Type: application/json");
+
+$response = [
+    "code"    => 400,
+    "success" => false,
+    "api_type" => "WEB_ADMIN",
+    "message" => "Terjadi kesalahan",
+    "data" => []
+];
 
 try {
 
@@ -28,12 +36,16 @@ try {
     ";
 
     $result = $conn->query($query);
-
     $data = [];
+
     while ($row = $result->fetch_assoc()) {
 
+        $row['full_prize'] = (int)$row['full_prize'];
+        $row['angsuran']   = (int)$row['angsuran'];
+        $row['dp']         = (int)$row['dp'];
+        $row['jarak_tempuh'] = (int)$row['jarak_tempuh'];
+
         if (!empty($row['foto'])) {
-            // path di DB: /images/mobil/xxx.jpg
             $row['foto'] = BASE_URL . $row['foto'];
         } else {
             $row['foto'] = null;
@@ -42,17 +54,16 @@ try {
         $data[] = $row;
     }
 
-    echo json_encode([
-        "success" => true,
-        "api_type" => "WEB_ADMIN",   // 🔥 penanda bahwa ini API WEB ADMIN
-        "data" => $data
-    ]);
+    $response['code'] = 200;
+    $response['success'] = true;
+    $response['message'] = "OK";
+    $response['data'] = $data;
 
 } catch (Exception $e) {
-    echo json_encode([
-        "success" => false,
-        "api_type" => "WEB_ADMIN",
-        "message" => $e->getMessage()
-    ]);
+
+    $response['code'] = 400;
+    $response['success'] = false;
+    $response['message'] = $e->getMessage();
 }
-?>
+
+echo json_encode($response);
