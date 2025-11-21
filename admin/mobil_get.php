@@ -15,14 +15,30 @@ $id     = isset($_GET['id']) ? trim($_GET['id']) : '';
 // 1. LIST MOBIL → ?action=list
 // =======================================================
 if ($action === 'list') {
+     $statusFilter = $_GET['status'] ?? '';  // <-- tambahan
+
+    $where = '';
+    if ($statusFilter !== '') {
+        // amanin value
+        $statusFilter = $conn->real_escape_string($statusFilter);
+        $where = "WHERE m.status = '$statusFilter'";
+    }
 
     $sql = "
-        SELECT 
-            kode_mobil,
-            nama_mobil,
-            tahun_mobil
-        FROM mobil
-        ORDER BY nama_mobil
+      SELECT 
+        m.kode_mobil,
+        m.nama_mobil,
+        m.tahun_mobil AS tahun,
+        m.full_prize   AS full_price,
+        m.uang_muka    AS dp,
+        m.jarak_tempuh AS km,
+        m.tenor,
+        m.angsuran,
+        m.jenis_kendaraan AS tipe,
+        m.status
+      FROM mobil m
+      $where
+      ORDER BY m.created_at DESC
     ";
 
     $res = $conn->query($sql);
@@ -35,7 +51,7 @@ if ($action === 'list') {
         $data[] = [
             'kode_mobil' => $row['kode_mobil'],
             'nama_mobil' => $row['nama_mobil'],
-            'tahun'      => $row['tahun_mobil'],
+            'tahun'      => $row['tahun'],
         ];
     }
 

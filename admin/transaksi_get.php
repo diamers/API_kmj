@@ -62,9 +62,11 @@ if ($action === 'detail') {
 
     $sql = "SELECT
           t.kode_transaksi,
+          t.kode_mobil,
           t.nama_pembeli,
           t.no_hp,
           t.tipe_pembayaran,
+          t.nama_kredit,
           t.harga_akhir,
           t.created_at,
           t.status,
@@ -95,6 +97,42 @@ if ($action === 'detail') {
     if (!$data) {
         json_error('Data transaksi tidak ditemukan', 404);
     }
+
+        // ==== AMBIL JAMINAN BERDASARKAN id_jaminan ====
+    $sqlJ = "SELECT dj.id_jaminan
+             FROM detail_jaminan dj
+             WHERE dj.kode_transaksi = ?";
+    $stmtJ = $conn->prepare($sqlJ);
+    if ($stmtJ) {
+        $stmtJ->bind_param('s', $kode);
+        $stmtJ->execute();
+        $resJ = $stmtJ->get_result();
+
+        // default semua 0
+        $jaminanFlags = [
+            'ktp'      => 0,
+            'kk'       => 0,
+            'rekening' => 0,
+        ];
+
+        while ($rowJ = $resJ->fetch_assoc()) {
+            $idJ = intval($rowJ['id_jaminan']);
+
+            // ⚠️ SESUAIKAN ANGKA2 INI DENGAN TABEL `jaminan` DI DB-MU
+            if ($idJ === 1) {
+                $jaminanFlags['ktp'] = 1;
+            } elseif ($idJ === 2) {
+                $jaminanFlags['kk'] = 1;
+            } elseif ($idJ === 3) {
+                $jaminanFlags['rekening'] = 1;
+            }
+        }
+
+        $stmtJ->close();
+
+        $data['jaminan'] = $jaminanFlags;
+    }
+
 
     echo json_encode([
         'status' => 'success',

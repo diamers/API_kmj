@@ -27,7 +27,11 @@ if ($action === 'create') {
     $tipe_pembayaran = trim($req['tipe_pembayaran'] ?? '');
     $tipe_pembayaran = strtolower($tipe_pembayaran);
     $note            = trim($req['note'] ?? '');
+    $nama_kredit     = trim($req['nama_kredit'] ?? '');
 
+
+
+    // mapping tipe pembayaran
     $mapPembayaran = [
         'tunai'  => 'cash',
         'cash'   => 'cash',
@@ -40,18 +44,23 @@ if ($action === 'create') {
         $tipe_pembayaran = 'cash';
     }
 
-    $harga_akhir     = $req['harga_akhir'] ?? null;
-    $kode_mobil      = trim($req['kode_mobil'] ?? '');
-    $kode_user       = trim($req['kode_user'] ?? '');
-    $status          = trim($req['status'] ?? 'pending');
+    $harga_akhir = $req['harga_akhir'] ?? null;
+    $kode_mobil  = trim($req['kode_mobil'] ?? '');
+    $kode_user   = trim($req['kode_user'] ?? '');
+    $status      = trim($req['status'] ?? 'pending');
+
+    // ==== jaminan dari request ====
+    $jaminan_ktp      = intval($req['jaminan_ktp'] ?? 0);
+    $jaminan_kk       = intval($req['jaminan_kk'] ?? 0);
+    $jaminan_rekening = intval($req['jaminan_rekening'] ?? 0);
 
     // VALIDASI
     if ($nama_pembeli === '') json_error('Field nama_pembeli wajib diisi');
-    if ($no_hp === '') json_error('Field no_hp wajib diisi');
+    if ($no_hp === '')        json_error('Field no_hp wajib diisi');
     if ($tipe_pembayaran === '') json_error('Field tipe_pembayaran wajib diisi');
     if (!is_numeric($harga_akhir)) json_error('Field harga_akhir wajib numeric');
-    if ($kode_mobil === '') json_error('Field kode_mobil wajib diisi');
-    if ($kode_user === '') json_error('Field kode_user wajib diisi');
+    if ($kode_mobil === '')   json_error('Field kode_mobil wajib diisi');
+    if ($kode_user === '')    json_error('Field kode_user wajib diisi');
 
     // NORMALISASI STATUS
     $status = strtolower($status);
@@ -75,18 +84,20 @@ if ($action === 'create') {
     // GENERATE KODE TRANSAKSI
     $kode_transaksi = 'TRX' . date('YmdHis');
 
-    // INSERT
+    // INSERT KE TABEL TRANSAKSI
     $sql = "INSERT INTO transaksi
-            (kode_transaksi, nama_pembeli, no_hp, tipe_pembayaran, harga_akhir, kode_mobil, kode_user, status, note, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        (kode_transaksi, nama_pembeli, no_hp, tipe_pembayaran, harga_akhir,
+        kode_mobil, kode_user, status, note, nama_kredit, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         json_error('Gagal prepare insert: '.$conn->error, 500);
     }
 
+    // s = string, i = int
     $stmt->bind_param(
-        'ssssissss',
+        'ssssisssss',
         $kode_transaksi,
         $nama_pembeli,
         $no_hp,
@@ -95,11 +106,81 @@ if ($action === 'create') {
         $kode_mobil,
         $kode_user,
         $status,
-        $note
+        $note,
+        $nama_kredit
     );
+
+    
 
     if (!$stmt->execute()) {
         json_error('Gagal menyimpan transaksi: '.$stmt->error, 500);
+    }
+
+    $stmt->close();
+
+    
+    // ================== UPDATE STATUS MOBIL ==================
+    // Tentukan status mobil baru berdasarkan status transaksi
+    // (sesuaikan dengan enum di tabel `mobil` kamu)
+    $status_mobil_baru = 'available';
+
+    if ($status === 'completed') {
+        $status_mobil_baru = 'sold';      // misal enum: available / reserved / sold / shipping / delivered
+    } elseif ($status === 'pending') {
+        $status_mobil_baru = 'reserved';
+    } elseif ($status === 'cancelled') {
+        $status_mobil_baru = 'available';
+    }
+
+    $sqlMobil = "UPDATE mobil SET status = ? WHERE kode_mobil = ?";
+    $stmtMobil = $conn->prepare($sqlMobil);
+    if ($stmtMobil) {
+        $stmtMobil->bind_param('ss', $status_mobil_baru, $kode_mobil);
+        $stmtMobil->execute();
+        $stmtMobil->close();
+    }
+    
+    // ==== SIMPAN DETAIL JAMINAN (jika ada yang dicentang) ====
+    // ⚠️ SESUAIKAN ID DI BAWAH INI DENGAN TABEL `jaminan` PUNYAMU
+    $ID_JAMINAN_KTP      = 1;
+    $ID_JAMINAN_KK       = 2;
+    $ID_JAMINAN_REKENING = 3;
+
+    $sqlJ = "INSERT INTO detail_jaminan (kode_transaksi, id_jaminan, keterangan)
+             VALUES (?, ?, NULL)";
+    $stmtJ = $conn->prepare($sqlJ);
+    if (!$stmtJ) {
+        json_error('Gagal prepare detail jaminan: '.$conn->error, 500);
+    }
+
+    if ($jaminan_ktp) {
+        $idJ = $ID_JAMINAN_KTP;
+        $stmtJ->bind_param('si', $kode_transaksi, $idJ);
+        $stmtJ->execute();
+    }
+    if ($jaminan_kk) {
+        $idJ = $ID_JAMINAN_KK;
+        $stmtJ->bind_param('si', $kode_transaksi, $idJ);
+        $stmtJ->execute();
+    }
+    if ($jaminan_rekening) {
+        $idJ = $ID_JAMINAN_REKENING;
+        $stmtJ->bind_param('si', $kode_transaksi, $idJ);
+        $stmtJ->execute();
+    }
+
+    $stmtJ->close();
+
+
+    if ($status === 'completed') {
+        $sqlM = "UPDATE mobil SET status = 'sold' WHERE kode_mobil = ?";
+        $stmtM = $conn->prepare($sqlM);
+        if ($stmtM) {
+            $stmtM->bind_param('s', $kode_mobil);
+            $stmtM->execute();
+            $stmtM->close();
+        }
+        // kalau gagal update mobil, kita tidak matikan proses transaksi
     }
 
     echo json_encode([
@@ -128,6 +209,8 @@ elseif ($action === 'update') {
     $tipe_pembayaran = trim($req['tipe_pembayaran'] ?? '');
     $tipe_pembayaran = strtolower($tipe_pembayaran);
     $note            = trim($req['note'] ?? '');
+    $nama_kredit     = trim($req['nama_kredit'] ?? '');
+
 
     $mapPembayaran = [
         'tunai'  => 'cash',
@@ -145,6 +228,29 @@ elseif ($action === 'update') {
     $kode_mobil  = trim($req['kode_mobil'] ?? '');
     $kode_user   = trim($req['kode_user'] ?? '');
     $status      = trim($req['status'] ?? 'pending');
+    $jaminan_ktp      = intval($req['jaminan_ktp'] ?? 0);
+    $jaminan_kk       = intval($req['jaminan_kk'] ?? 0);
+    $jaminan_rekening = intval($req['jaminan_rekening'] ?? 0);
+
+        // ambil data lama dulu (status & kode_mobil sebelumnya)
+    $sqlOld = "SELECT status, kode_mobil FROM transaksi WHERE kode_transaksi = ?";
+    $stmtOld = $conn->prepare($sqlOld);
+    if (!$stmtOld) {
+        json_error('Gagal prepare select transaksi lama: '.$conn->error, 500);
+    }
+    $stmtOld->bind_param('s', $kode_transaksi);
+    $stmtOld->execute();
+    $resultOld = $stmtOld->get_result();
+    $old = $resultOld->fetch_assoc();
+    $stmtOld->close();
+
+    if (!$old) {
+        json_error('Transaksi tidak ditemukan (data lama)', 404);
+    }
+
+    $oldStatus    = strtolower($old['status'] ?? '');
+    $oldKodeMobil = $old['kode_mobil'] ?? '';
+
 
     // VALIDASI (boleh sama persis dg create)
     if ($nama_pembeli === '') json_error('Field nama_pembeli wajib diisi');
@@ -173,6 +279,8 @@ elseif ($action === 'update') {
         $status = 'pending';
     }
 
+    
+
     // QUERY UPDATE
     $sql = "UPDATE transaksi
             SET nama_pembeli    = ?,
@@ -182,7 +290,8 @@ elseif ($action === 'update') {
                 kode_mobil      = ?,
                 kode_user       = ?,
                 status          = ?,
-                note            = ?
+                note            = ?,
+                nama_kredit     = ?
             WHERE kode_transaksi = ?";
 
     $stmt = $conn->prepare($sql);
@@ -192,7 +301,7 @@ elseif ($action === 'update') {
 
     // tipe: s s s i s s s s s  → 9 parameter
     $stmt->bind_param(
-        'sssisssss',
+        'sssissssss',
         $nama_pembeli,
         $no_hp,
         $tipe_pembayaran,
@@ -201,6 +310,7 @@ elseif ($action === 'update') {
         $kode_user,
         $status,
         $note,
+        $nama_kredit,
         $kode_transaksi
     );
 
@@ -213,6 +323,31 @@ elseif ($action === 'update') {
         json_error('Transaksi tidak ditemukan atau data tidak berubah', 404);
     }
 
+        // ====== update status mobil kalau perlu ======
+    // kalau status BARU = completed dan status LAMA bukan completed
+    if ($status === 'completed' && $oldStatus !== 'completed') {
+        $sqlM = "UPDATE mobil SET status = 'sold' WHERE kode_mobil = ?";
+        $stmtM = $conn->prepare($sqlM);
+        if ($stmtM) {
+            $stmtM->bind_param('s', $kode_mobil);
+            $stmtM->execute();
+            $stmtM->close();
+        }
+    }
+
+    // (opsional) kalau status diubah dari completed → pending/cancelled,
+    // kamu bisa mengembalikan mobil ke available:
+    
+    if ($oldStatus === 'completed' && $status !== 'completed') {
+        $sqlM2 = "UPDATE mobil SET status = 'available' WHERE kode_mobil = ?";
+        $stmtM2 = $conn->prepare($sqlM2);
+        if ($stmtM2) {
+            $stmtM2->bind_param('s', $oldKodeMobil);
+            $stmtM2->execute();
+            $stmtM2->close();
+        }
+    }
+    
     echo json_encode([
         'status'  => 'success',
         'message' => 'Transaksi berhasil diupdate',
