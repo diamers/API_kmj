@@ -1,19 +1,19 @@
 <?php
-$host = "localhost";
-$user = "root";
-$pass = "";
-$dbname = "kmjshowrooms";
-$port = 3306;
+$host = "127.0.0.1";
+$user = "admin";
+$pass = "1234";
+$dbname = "maverick_kmj";
+$port = 8889;
 
 header('Content-Type: application/json');
 
 $conn = new mysqli($host, $user, $pass, $dbname, $port);
 
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "DB gagal: " . $conn->connect_error]));
+    die(json_encode(["code" => 500, "message" => "DB gagal: " . $conn->connect_error]));
 }
 
-define("BASE_URL", "http://localhost:80/API_kmj");
+define("BASE_URL", "http://localhost:8888/api_kmj");
 
 try {
     $pdo = new PDO(
