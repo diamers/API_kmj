@@ -13,7 +13,7 @@ if ($conn->connect_error) {
     die(json_encode(["success" => false, "message" => "DB gagal: " . $conn->connect_error]));
 }
 
-define("BASE_URL", "http://localhost/API_kmj");
+define("BASE_URL", "http://localhost:80/API_kmj");
 
 try {
     $pdo = new PDO(

@@ -19,11 +19,12 @@ try {
     // 1. AMBIL DATA MOBIL
     // ============================
     $stmt = $conn->prepare("
-        SELECT 
+               SELECT 
             kode_mobil,
             nama_mobil,
             tahun_mobil,
             jarak_tempuh,
+            full_prize,
             uang_muka,
             tenor,
             angsuran,

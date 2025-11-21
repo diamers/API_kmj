@@ -9,6 +9,7 @@ try {
             m.kode_mobil,
             m.nama_mobil,
             m.tahun_mobil,
+            m.full_prize,
             m.warna_exterior,
             m.warna_interior,
             m.tipe_bahan_bakar,
