@@ -5,7 +5,7 @@ require '../shared/config.php';
 
 function json_error($msg, $code = 400) {
     http_response_code($code);
-    echo json_encode(['status' => 'error', 'message' => $msg]);
+    echo json_encode(['code' => (string)$code, 'message' => $msg]);
     exit;
 }
 
@@ -47,7 +47,7 @@ if ($action === 'list') {
     }
 
     echo json_encode([
-        'status' => 'success',
+        'code' => '200',
         'data'   => $rows,
     ]);
     exit;
@@ -134,8 +134,8 @@ if ($action === 'detail') {
     }
 
 
-    echo json_encode([
-        'status' => 'success',
+    echo json_encode(value: [
+        'code' => '200',
         'data'   => $data,
     ]);
     exit;

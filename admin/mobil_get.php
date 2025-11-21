@@ -4,7 +4,7 @@ require_once __DIR__ . '/../shared/config.php';
 
 function json_error($msg, $code = 400) {
     http_response_code($code);
-    echo json_encode(['status' => 'error', 'message' => $msg]);
+    echo json_encode(['code' => (string)$code, 'message' => $msg]);
     exit;
 }
 
@@ -56,7 +56,7 @@ if ($action === 'list') {
     }
 
     echo json_encode([
-        'status' => 'ok',
+        'code' => '200',
         'data'   => $data,
     ]);
     exit;
@@ -129,7 +129,7 @@ if ($stmt2) {
 }
 
 echo json_encode([
-    'status'      => 'ok',
+    'code'      => '200',
     'kode_mobil'  => $row['kode_mobil'],
     'nama_mobil'  => $row['nama_mobil'],
     'tahun'       => $row['tahun_mobil'],

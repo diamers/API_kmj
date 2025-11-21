@@ -5,7 +5,7 @@ require '../shared/config.php';
 
 function json_error($msg, $code = 400) {
     http_response_code($code);
-    echo json_encode(['status' => 'error', 'message' => $msg]);
+    echo json_encode(['code' => (string)$code, 'message' => $msg]);
     exit;
 }
 
@@ -139,7 +139,7 @@ if ($action === 'create') {
         $stmtMobil->execute();
         $stmtMobil->close();
     }
-    
+
     // ==== SIMPAN DETAIL JAMINAN (jika ada yang dicentang) ====
     // ⚠️ SESUAIKAN ID DI BAWAH INI DENGAN TABEL `jaminan` PUNYAMU
     $ID_JAMINAN_KTP      = 1;
@@ -184,7 +184,7 @@ if ($action === 'create') {
     }
 
     echo json_encode([
-        'status'  => 'success',
+        'code'  => '200',
         'message' => 'Transaksi berhasil dibuat',
         'data'    => [
             'kode_transaksi' => $kode_transaksi,
@@ -349,7 +349,7 @@ elseif ($action === 'update') {
     }
     
     echo json_encode([
-        'status'  => 'success',
+        'code'  => '200',
         'message' => 'Transaksi berhasil diupdate',
         'data'    => [
             'kode_transaksi' => $kode_transaksi,
