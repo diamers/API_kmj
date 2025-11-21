@@ -81,8 +81,19 @@ if ($action === 'create') {
         $status = 'pending';
     }
 
-    // GENERATE KODE TRANSAKSI
-    $kode_transaksi = 'TRX' . date('YmdHis');
+        // GENERATE KODE TRANSAKSI via FUNCTION MySQL
+    $sqlKode = "SELECT generate_kode_transaksi() AS kode";
+    $resKode = $conn->query($sqlKode);
+    if (!$resKode) {
+        json_error('Gagal generate kode transaksi: '.$conn->error, 500);
+    }
+
+    $rowKode = $resKode->fetch_assoc();
+    $kode_transaksi = $rowKode['kode'] ?? null;
+
+    if (!$kode_transaksi) {
+        json_error('Gagal generate kode transaksi (hasil kosong)', 500);
+    }
 
     // INSERT KE TABEL TRANSAKSI
     $sql = "INSERT INTO transaksi
