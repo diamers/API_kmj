@@ -1,7 +1,6 @@
 <?php
 // API_kmj/admin/get_dashboard_charts.php
-
-require '../../db/config_api.php'; // koneksi $conn (mysqli/pdo)
+require __DIR__ . "/../shared/config.php"; // SAMA seperti API lain
 header('Content-Type: application/json');
 
 $response = [

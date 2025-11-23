@@ -92,14 +92,38 @@ if ($check->get_result()->num_rows > 0) {
     exit;
 }
 
-/* ======================= GENERATE KODE USER ======================= */
-$q = $conn->query("SELECT generate_kode_users() AS kode_user");
-if (!$q || !($row = $q->fetch_assoc())) {
+/* ======================= GENERATE KODE USER BARU ======================= */
+$prefix = null;
+
+switch ($role) {
+    case "owner":
+        $prefix = "OWN";
+        break;
+    case "admin":
+        $prefix = "ADM";
+        break;
+    case "customer":
+        $prefix = "CUS";
+        break;
+    default:
+        http_response_code(400);
+        echo json_encode(["code" => 400, "message" => "Role tidak valid untuk generate kode user"]);
+        exit;
+}
+
+$stmtKode = $conn->prepare("SELECT generate_kode_user(?) AS kode_user");
+$stmtKode->bind_param("s", $prefix);
+$stmtKode->execute();
+$resKode = $stmtKode->get_result();
+
+if (!$resKode || !($rowKode = $resKode->fetch_assoc())) {
     http_response_code(500);
     echo json_encode(["code" => 500, "message" => "Gagal membuat kode user"]);
     exit;
 }
-$kode_user = $row['kode_user'];
+
+$kode_user = $rowKode['kode_user'];
+
 
 /* ======================= HANDLE AVATAR ======================= */
 if ($provider_type != "local") {
