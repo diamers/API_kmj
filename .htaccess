@@ -1,0 +1,5 @@
+RewriteEngine On
+
+# Fix Authorization header for PHP (MAMP issue)
+RewriteCond %{HTTP:Authorization} ^(.+)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
