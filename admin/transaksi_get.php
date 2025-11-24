@@ -47,8 +47,8 @@ if ($action === 'list') {
     }
 
     echo json_encode([
-        'code' => '200',
-        'data'   => $rows,
+    'code' => '200',
+    'data' => $rows,
     ]);
     exit;
 }
