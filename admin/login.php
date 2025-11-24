@@ -53,13 +53,12 @@ if ($provider_type == "local") {
         $update->execute();
 
         $token = null;
-        if (in_array($user["role"], ["admin", "owner"])) {
-            $token = generate_jwt([
-                "kode_user" => $user["kode_user"],
-                "username" => $user["username"],
-                "role" => $user["role"]
-            ]);
-        }
+        $token = generate_jwt([
+            "kode_user" => $user["kode_user"],
+            "username" => $user["username"],
+            "role" => $user["role"]
+        ]);
+
 
         echo json_encode([
             "code" => 200,
@@ -70,10 +69,12 @@ if ($provider_type == "local") {
                 "username" => $user["username"],
                 "full_name" => $user["full_name"],
                 "email" => $user["email"],
+                "no_telp" => $user["no_telp"],
+                "alamat"=> $user["alamat"],
                 "role" => $user["role"],
                 "avatar_url" => $user["avatar_url"],
                 "provider_type" => $user["provider_type"],
-                "status" => (int)$user["status"]
+                "status" => (int) $user["status"]
             ]
         ]);
 
