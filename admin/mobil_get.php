@@ -4,7 +4,7 @@ require_once __DIR__ . '/../shared/config.php';
 
 function json_error($msg, $code = 400) {
     http_response_code($code);
-    echo json_encode(['status' => 'error', 'message' => $msg]);
+    echo json_encode(['code' => (string)$code, 'message' => $msg]);
     exit;
 }
 
@@ -15,13 +15,12 @@ $id     = isset($_GET['id']) ? trim($_GET['id']) : '';
 // 1. LIST MOBIL → ?action=list
 // =======================================================
 if ($action === 'list') {
-     $statusFilter = $_GET['status'] ?? '';  // <-- tambahan
+    $statusFilter = isset($_GET['status']) ? strtolower($_GET['status']) : '';
 
     $where = '';
     if ($statusFilter !== '') {
-        // amanin value
         $statusFilter = $conn->real_escape_string($statusFilter);
-        $where = "WHERE m.status = '$statusFilter'";
+        $where = "WHERE LOWER(m.status) = '$statusFilter'";
     }
 
     $sql = "
@@ -29,12 +28,7 @@ if ($action === 'list') {
         m.kode_mobil,
         m.nama_mobil,
         m.tahun_mobil AS tahun,
-        m.full_prize   AS full_price,
-        m.uang_muka    AS dp,
-        m.jarak_tempuh AS km,
-        m.tenor,
-        m.angsuran,
-        m.jenis_kendaraan AS tipe,
+        m.full_prize AS full_price,
         m.status
       FROM mobil m
       $where
@@ -51,16 +45,17 @@ if ($action === 'list') {
         $data[] = [
             'kode_mobil' => $row['kode_mobil'],
             'nama_mobil' => $row['nama_mobil'],
-            'tahun'      => $row['tahun'],
+            'tahun'      => $row['tahun'], // gunakan alias yang benar
         ];
     }
 
     echo json_encode([
-        'status' => 'ok',
+        'code' => '200',
         'data'   => $data,
     ]);
     exit;
 }
+
 
 // =======================================================
 // 2. DETAIL MOBIL → ?id=MB0000001
@@ -129,7 +124,7 @@ if ($stmt2) {
 }
 
 echo json_encode([
-    'status'      => 'ok',
+    'code'      => '200',
     'kode_mobil'  => $row['kode_mobil'],
     'nama_mobil'  => $row['nama_mobil'],
     'tahun'       => $row['tahun_mobil'],

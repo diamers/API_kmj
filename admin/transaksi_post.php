@@ -5,7 +5,7 @@ require '../shared/config.php';
 
 function json_error($msg, $code = 400) {
     http_response_code($code);
-    echo json_encode(['status' => 'error', 'message' => $msg]);
+    echo json_encode(['code' => (string)$code, 'message' => $msg]);
     exit;
 }
 
@@ -81,8 +81,19 @@ if ($action === 'create') {
         $status = 'pending';
     }
 
-    // GENERATE KODE TRANSAKSI
-    $kode_transaksi = 'TRX' . date('YmdHis');
+        // GENERATE KODE TRANSAKSI via FUNCTION MySQL
+    $sqlKode = "SELECT generate_kode_transaksi() AS kode";
+    $resKode = $conn->query($sqlKode);
+    if (!$resKode) {
+        json_error('Gagal generate kode transaksi: '.$conn->error, 500);
+    }
+
+    $rowKode = $resKode->fetch_assoc();
+    $kode_transaksi = $rowKode['kode'] ?? null;
+
+    if (!$kode_transaksi) {
+        json_error('Gagal generate kode transaksi (hasil kosong)', 500);
+    }
 
     // INSERT KE TABEL TRANSAKSI
     $sql = "INSERT INTO transaksi
@@ -139,7 +150,7 @@ if ($action === 'create') {
         $stmtMobil->execute();
         $stmtMobil->close();
     }
-    
+
     // ==== SIMPAN DETAIL JAMINAN (jika ada yang dicentang) ====
     // ⚠️ SESUAIKAN ID DI BAWAH INI DENGAN TABEL `jaminan` PUNYAMU
     $ID_JAMINAN_KTP      = 1;
@@ -184,7 +195,7 @@ if ($action === 'create') {
     }
 
     echo json_encode([
-        'status'  => 'success',
+        'code'  => '200',
         'message' => 'Transaksi berhasil dibuat',
         'data'    => [
             'kode_transaksi' => $kode_transaksi,
@@ -349,7 +360,7 @@ elseif ($action === 'update') {
     }
     
     echo json_encode([
-        'status'  => 'success',
+        'code'  => '200',
         'message' => 'Transaksi berhasil diupdate',
         'data'    => [
             'kode_transaksi' => $kode_transaksi,
