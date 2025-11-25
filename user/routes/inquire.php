@@ -55,6 +55,8 @@ $jenis_janji = isset($_POST['jenis_janji']) ? (int)$_POST['jenis_janji'] : 0;
 $tanggal     = $_POST['tanggal']     ?? '';
 $waktu       = $_POST['waktu']       ?? '';
 $no_telp     = $_POST['no_telp']     ?? '';
+$note        = $_POST['note']        ?? null;
+
 
 // validasi minimal
 if (!$kode_mobil || !$tanggal || !$waktu || !$no_telp) {
@@ -76,6 +78,7 @@ try {
         'tanggal'     => $tanggal,
         'waktu'       => $waktu,
         'no_telp'     => $no_telp,
+        'note'        => $note,
     ]);
 
     send_response(200, 'Inquire berhasil dibuat', [
