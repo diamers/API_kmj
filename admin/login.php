@@ -1,5 +1,15 @@
 <?php
 header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *"); 
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Credentials: true");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 require __DIR__ . "/../shared/config.php";
 require __DIR__ . "/../shared/jwt_helper.php";
 
@@ -53,13 +63,12 @@ if ($provider_type == "local") {
         $update->execute();
 
         $token = null;
-        if (in_array($user["role"], ["admin", "owner"])) {
-            $token = generate_jwt([
-                "kode_user" => $user["kode_user"],
-                "username" => $user["username"],
-                "role" => $user["role"]
-            ]);
-        }
+        $token = generate_jwt([
+            "kode_user" => $user["kode_user"],
+            "username" => $user["username"],
+            "role" => $user["role"]
+        ]);
+
 
         echo json_encode([
             "code" => 200,
@@ -70,10 +79,12 @@ if ($provider_type == "local") {
                 "username" => $user["username"],
                 "full_name" => $user["full_name"],
                 "email" => $user["email"],
+                "no_telp" => $user["no_telp"],
+                "alamat"=> $user["alamat"],
                 "role" => $user["role"],
                 "avatar_url" => $user["avatar_url"],
                 "provider_type" => $user["provider_type"],
-                "status" => (int)$user["status"]
+                "status" => (int) $user["status"]
             ]
         ]);
 
