@@ -6,14 +6,14 @@ $kode_mobil = $_GET["kode_mobil"] ?? null;
 
 if (!$kode_mobil) {
     echo json_encode([
-        "success" => false,
+        "code" => 400,
         "message" => "kode_mobil tidak ditemukan"
     ]);
     exit;
 }
 
 try {
-    // Ambil info utama
+    // INFO UTAMA
     $query = "
         SELECT *
         FROM mobil
@@ -23,13 +23,13 @@ try {
 
     if (!$mobil) {
         echo json_encode([
-            "success" => false,
+            "code" => 404,
             "message" => "Mobil tidak ditemukan"
         ]);
         exit;
     }
 
-    // Ambil foto mobil
+    // FOTO
     $qFoto = "
         SELECT id_foto, tipe_foto, nama_file AS foto
         FROM mobil_foto 
@@ -44,23 +44,28 @@ try {
         $fotoList[] = $f;
     }
 
-    // Ambil fitur mobil
+    // FITUR (JOIN → Ambil nama fitur)
     $qFitur = "
-        SELECT Id_fitur AS fitur_id
-        FROM mobil_fitur
-        WHERE kode_mobil = '$kode_mobil'
+        SELECT 
+            mf.Id_fitur AS id,
+            f.nama_fitur AS nama
+        FROM mobil_fitur mf
+        JOIN fitur f ON mf.Id_fitur = f.id_fitur
+        WHERE mf.kode_mobil = '$kode_mobil'
     ";
 
     $fiturList = [];
     $resultFitur = $conn->query($qFitur);
 
     while ($row = $resultFitur->fetch_assoc()) {
-        $fiturList[] = intval($row["fitur_id"]);
+        $fiturList[] = [
+            "id" => intval($row["id"]),
+            "nama" => $row["nama"]
+        ];
     }
 
     echo json_encode([
         "code" => 200,
-        "success" => true,
         "mobil" => $mobil,
         "foto" => $fotoList,
         "fitur" => $fiturList
@@ -69,7 +74,6 @@ try {
 } catch (Exception $e) {
     echo json_encode([
         "code" => 500,
-        "success" => false,
         "message" => $e->getMessage()
     ]);
 }

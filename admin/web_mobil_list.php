@@ -23,7 +23,7 @@ try {
         FROM mobil m
         LEFT JOIN mobil_foto mf 
             ON mf.kode_mobil = m.kode_mobil 
-            AND mf.urutan = 1
+            AND mf.tipe_foto = 'depan'
         ORDER BY m.created_at DESC;
     ";
 
