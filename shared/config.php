@@ -26,6 +26,6 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    die(json_encode(["success" => false, "message" => "PDO gagal: " . $e->getMessage()]));
+    die(json_encode(["code" => 500, "message" => "PDO gagal: " . $e->getMessage()]));
 }
 ?>
