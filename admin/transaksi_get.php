@@ -20,12 +20,17 @@ $action = $req['action'] ?? '';
 
 // ================== GET LIST ==================
 if ($action === 'list') {
-
+//tambah no_hp sama full_prize buat ditampilin di detail transaksi, tambah tenor,tipe pembayaran, angsuran buat credit
     $sql = "
       SELECT 
         t.kode_transaksi,
         t.nama_pembeli,
+        t.no_hp,
+        t.tipe_pembayaran,
         m.nama_mobil,
+        m.full_prize AS harga_asli,
+        m.tenor,
+        m.angsuran,
         t.created_at AS tanggal,
         t.status,
         t.harga_akhir,
@@ -71,7 +76,6 @@ if ($action === 'detail') {
           t.created_at,
           t.status,
           t.note,
-
           m.nama_mobil,
           m.tahun_mobil,
           m.jenis_kendaraan AS tipe_mobil,

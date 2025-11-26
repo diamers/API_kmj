@@ -11,7 +11,11 @@ $input = json_decode(file_get_contents('php://input'), true);
 if ($input)
     $_POST = $input;
 
-file_put_contents("debug_user.txt", print_r($_POST, true));
+file_put_contents("debug_request.txt", print_r([
+    'POST' => $_POST,
+    'FILES' => $_FILES,
+    'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD']
+], true));
 
 // Validasi method
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -26,7 +30,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 // Helper: agar bisa bind_param dinamis dengan call_user_func_array
 function refValues($arr)
 {
-    // untuk PHP yang membutuhkan reference array
     $refs = [];
     foreach ($arr as $k => $v) {
         $refs[$k] = &$arr[$k];
@@ -116,116 +119,156 @@ try {
 
     $fitur = $_POST['fitur'] ?? [];
     $fotoList = $_POST['foto'] ?? [];
-    // Tentukan starting urutan (khusus UPDATE kita ambil dari DB)
-    $startUrut = 1;
+
+    // ✅ DETEKSI SUMBER REQUEST: Android vs Web Admin
+    $isAndroidRequest = !empty($_FILES) && (
+        isset($_FILES['foto_360']) || 
+        isset($_FILES['foto_depan']) || 
+        isset($_FILES['foto_belakang']) || 
+        isset($_FILES['foto_samping']) ||
+        isset($_FILES['foto_tambahan'])
+    );
+
+    $uploadDir = API_UPLOAD_DIR;
+    $publicBase = '/images/mobil/';
+
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0775, true);
+    }
+
+    // =============== HANDLE UPLOAD FILE (ANDROID & WEB) ===============
+    if ($isAndroidRequest) {
+    file_put_contents("debug_android.txt", "=== ANDROID UPLOAD START ===\n", FILE_APPEND);
+
+    // ✅ ANDROID: Process uploaded files langsung dari $_FILES
+    $fotoList = [];
+    
+    // Mapping tipe foto
+    $fotoMapping = [
+        'foto_360' => '360',
+        'foto_depan' => 'depan',
+        'foto_belakang' => 'belakang',
+        'foto_samping' => 'samping'
+    ];
+
+    // ✅ FIX: Ambil urutan maksimal dari database (jika update)
+    $urut = 1;
     if ($updateMode && !empty($kodeMobil)) {
         $stmt = $conn->prepare("SELECT COALESCE(MAX(urutan), 0) AS max_urut FROM mobil_foto WHERE kode_mobil = ?");
         $stmt->bind_param("s", $kodeMobil);
         $stmt->execute();
         $rowMax = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-
-        $startUrut = (int) ($rowMax['max_urut'] ?? 0) + 1;  // lanjut dari urutan terakhir
+        
+        $urut = (int)($rowMax['max_urut'] ?? 0) + 1; // Lanjut dari urutan terakhir
+        file_put_contents("debug_android.txt", "Starting urutan from: $urut\n", FILE_APPEND);
     }
-    // =============== HANDLE UPLOAD FILE DARI WEB ADMIN ===============
-    if (empty($fotoList) && !empty($_FILES)) {
-        $fotoList = [];
 
-        $uploadDir = API_UPLOAD_DIR;
-        $publicBase = API_PUBLIC_PATH;
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0775, true);
-        }
-        $publicBase = '/images/mobil/';
-
-        // Helper untuk 1 file (360, depan, belakang, samping)
-        // Helper untuk 1 file (360, depan, belakang, samping)
-        $addSingle = function ($field, $tipe, $urutanStart) use (&$fotoList, $uploadDir, $publicBase, $conn, $updateMode, $kodeMobil) {
-            if (!isset($_FILES[$field]))
-                return $urutanStart;
-
+    // Process single files (360, depan, belakang, samping)
+    foreach ($fotoMapping as $field => $tipe) {
+        if (isset($_FILES[$field]) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
             $f = $_FILES[$field];
-            if ($f['error'] !== UPLOAD_ERR_OK || $f['size'] <= 0)
-                return $urutanStart;
-
             $ext = pathinfo($f['name'], PATHINFO_EXTENSION);
             $newName = uniqid('mobil_', true) . '.' . strtolower($ext);
             $dest = rtrim($uploadDir, '/\\') . DIRECTORY_SEPARATOR . $newName;
 
             if (move_uploaded_file($f['tmp_name'], $dest)) {
+                // ✅ FIX: Cek apakah tipe foto ini sudah ada di DB
+                $stmt = $conn->prepare("SELECT id_foto, urutan, nama_file FROM mobil_foto WHERE kode_mobil = ? AND tipe_foto = ? LIMIT 1");
+                $stmt->bind_param("ss", $kodeMobil, $tipe);
+                $stmt->execute();
+                $row = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
 
-                // default: anggap insert baru
-                $entry = [
-                    'tipe_foto' => $tipe,
-                    'nama_file' => $publicBase . $newName,
-                    'urutan' => $urutanStart,
-                ];
-
-                // Kalau UPDATE, cek apakah sudah ada foto untuk tipe ini (depan/360/samping/belakang)
-                if ($updateMode && !empty($kodeMobil)) {
-                    $stmt = $conn->prepare("SELECT id_foto, urutan FROM mobil_foto WHERE kode_mobil = ? AND tipe_foto = ? LIMIT 1");
-                    $stmt->bind_param("ss", $kodeMobil, $tipe);
-                    $stmt->execute();
-                    $row = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-
-                    if ($row) {
-                        // kalau sudah ada, kita REPLACE baris lama itu
-                        $entry['id_foto'] = (int) $row['id_foto'];
-                        // pakai urutan lama biar posisi relatifnya tetap
-                        $entry['urutan'] = (int) $row['urutan'];
-                    }
+                if ($row) {
+                    // ✅ REPLACE: Gunakan id_foto dan PERTAHANKAN urutan lama
+                    $entry = [
+                        'tipe_foto' => $tipe,
+                        'nama_file' => $publicBase . $newName,
+                        'urutan' => (int)$row['urutan'], // ❗ PENTING: Pakai urutan lama
+                        'id_foto' => (int)$row['id_foto'],
+                        'old_file' => $row['nama_file']
+                    ];
+                    
+                    file_put_contents("debug_android.txt", "REPLACE: $field ($tipe) - id={$entry['id_foto']}, urutan={$entry['urutan']}\n", FILE_APPEND);
+                } else {
+                    // ✅ INSERT BARU: Gunakan urutan baru
+                    $entry = [
+                        'tipe_foto' => $tipe,
+                        'nama_file' => $publicBase . $newName,
+                        'urutan' => $urut++, // Increment untuk foto baru
+                    ];
+                    
+                    file_put_contents("debug_android.txt", "NEW: $field ($tipe) - urutan={$entry['urutan']}\n", FILE_APPEND);
                 }
 
                 $fotoList[] = $entry;
-                $urutanStart++;
             }
+        }
+    }
 
-            return $urutanStart;
-        };
-
-
-        // Helper untuk multiple file (foto_tambahan[])
-        $addMultiple = function ($field, $tipe, $urutanStart) use (&$fotoList, $uploadDir, $publicBase) {
-            if (!isset($_FILES[$field]))
-                return $urutanStart;
-
-            $f = $_FILES[$field];
-            if (!is_array($f['name']))
-                return $urutanStart;
-
-            $count = count($f['name']);
-            for ($i = 0; $i < $count; $i++) {
-                if ($f['error'][$i] !== UPLOAD_ERR_OK || $f['size'][$i] <= 0)
-                    continue;
-
-                $ext = pathinfo($f['name'][$i], PATHINFO_EXTENSION);
+    // Process multiple files (foto_tambahan[])
+    if (isset($_FILES['foto_tambahan']) && is_array($_FILES['foto_tambahan']['name'])) {
+        $count = count($_FILES['foto_tambahan']['name']);
+        
+        // ✅ FIX: Hapus semua foto tambahan lama jika ada upload baru
+        if ($updateMode && !empty($kodeMobil) && $count > 0) {
+            $stmt = $conn->prepare("SELECT id_foto, nama_file FROM mobil_foto WHERE kode_mobil = ? AND tipe_foto = 'tambahan'");
+            $stmt->bind_param("s", $kodeMobil);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $oldTambahanFiles = [];
+            while ($row = $result->fetch_assoc()) {
+                $oldTambahanFiles[] = $row['nama_file'];
+            }
+            $stmt->close();
+            
+            // Hapus record foto tambahan lama
+            if (!empty($oldTambahanFiles)) {
+                $stmt = $conn->prepare("DELETE FROM mobil_foto WHERE kode_mobil = ? AND tipe_foto = 'tambahan'");
+                $stmt->bind_param("s", $kodeMobil);
+                $stmt->execute();
+                $stmt->close();
+                
+                // Hapus file fisik
+                $projectRoot = dirname(__DIR__);
+                foreach ($oldTambahanFiles as $path) {
+                    $filePath = parse_url($path, PHP_URL_PATH);
+                    if ($filePath === null || $filePath === false)
+                        $filePath = $path;
+                    if (strpos($filePath, '/images/mobil/') === 0) {
+                        $full = $projectRoot . $filePath;
+                        if (is_file($full)) {
+                            @unlink($full);
+                            file_put_contents("debug_android.txt", "Deleted old tambahan: $full\n", FILE_APPEND);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Upload foto tambahan baru
+        for ($i = 0; $i < $count; $i++) {
+            if ($_FILES['foto_tambahan']['error'][$i] === UPLOAD_ERR_OK) {
+                $ext = pathinfo($_FILES['foto_tambahan']['name'][$i], PATHINFO_EXTENSION);
                 $newName = uniqid('mobil_', true) . '.' . strtolower($ext);
                 $dest = rtrim($uploadDir, '/\\') . DIRECTORY_SEPARATOR . $newName;
 
-                if (move_uploaded_file($f['tmp_name'][$i], $dest)) {
+                if (move_uploaded_file($_FILES['foto_tambahan']['tmp_name'][$i], $dest)) {
                     $fotoList[] = [
-                        'tipe_foto' => $tipe,
+                        'tipe_foto' => 'tambahan',
                         'nama_file' => $publicBase . $newName,
-                        'urutan' => $urutanStart,
+                        'urutan' => $urut++, // Lanjut increment
                     ];
-                    $urutanStart++;
+                    file_put_contents("debug_android.txt", "NEW TAMBAHAN: urutan={$urut}\n", FILE_APPEND);
                 }
             }
-            return $urutanStart;
-        };
-
-        // Urutan foto: 360, depan, belakang, samping, lalu tambahan
-        // ⬇⬇⬇ ini yang penting: pakai $startUrut, bukan 1
-        $urut = $startUrut;
-        $urut = $addSingle('foto_depan', 'depan', $urut);
-        $urut = $addSingle('foto_belakang', 'belakang', $urut);
-        $urut = $addSingle('foto_samping', 'samping', $urut);
-        $urut = $addSingle('foto_360', '360', $urut);
-        $urut = $addMultiple('foto_tambahan', 'tambahan', $urut);
+        }
     }
 
+    file_put_contents("debug_android.txt", "Total processed: " . count($fotoList) . "\n=== ANDROID UPLOAD END ===\n\n", FILE_APPEND);
+}
 
     // ===================== UPDATE MOBIL =====================
     if ($updateMode) {
@@ -244,8 +287,7 @@ try {
             if (!$old)
                 throw new Exception("Mobil dengan kode $kodeMobil tidak ditemukan.");
 
-            // Gunakan nilai baru jika dikirim, jika tidak gunakan nilai lama
-            // mapping antara nama kolom DB dan nama field di POST
+            // Mapping field
             $fieldMap = [
                 'nama_mobil' => 'nama_mobil',
                 'tahun_mobil' => 'tahun',
@@ -262,20 +304,18 @@ try {
                 'status' => 'status',
             ];
 
-            // Gunakan nilai baru jika dikirim, kalau tidak, pakai nilai lama dari DB
+            // Gunakan nilai baru jika dikirim, kalau tidak, pakai nilai lama
             foreach ($data as $column => &$v) {
                 $postKey = $fieldMap[$column] ?? $column;
-
                 if (!isset($_POST[$postKey]) || $_POST[$postKey] === '') {
                     if (isset($old[$column])) {
                         $v = $old[$column];
                     }
                 }
             }
-            unset($v); // good practice untuk &ref
+            unset($v);
 
-
-            // Update data mobil (perhatikan urutan field sesuai struktur DB)
+            // Update data mobil
             $sql = "UPDATE mobil SET 
                         nama_mobil=?, 
                         tahun_mobil=?, 
@@ -293,9 +333,7 @@ try {
                     WHERE kode_mobil=?";
             $stmt = $conn->prepare($sql);
 
-            // buat type string dinamis: 1 s (nama) + 6 i (tahun,...,angsuran) + 7 s (jenis..,status,kode_mobil)
             $types = 's' . str_repeat('i', 6) . str_repeat('s', 7);
-
             $params = [
                 $types,
                 $data['nama_mobil'],
@@ -314,11 +352,10 @@ try {
                 $kodeMobil
             ];
             call_user_func_array([$stmt, 'bind_param'], refValues($params));
-
             $stmt->execute();
             $stmt->close();
 
-            // // ===================== FITUR (replace) =====================
+            // ===================== FITUR (replace) =====================
             $stmt = $conn->prepare("DELETE FROM mobil_fitur WHERE kode_mobil = ?");
             $stmt->bind_param("s", $kodeMobil);
             $stmt->execute();
@@ -334,77 +371,38 @@ try {
                 $stmt->close();
             }
 
-            // ===================== FOTO (smart update) =====================
-            // ===================== FOTO (smart update) =====================
-            if (!empty($fotoList)) {
-                // Ambil id + nama_file lama
-                $existingIds = [];
-                $existingFiles = []; // [id_foto => nama_file_lama]
-                $res = $conn->query("SELECT id_foto, nama_file FROM mobil_foto WHERE kode_mobil='" . $conn->real_escape_string($kodeMobil) . "'");
-                while ($r = $res->fetch_assoc()) {
-                    $id = (int) $r['id_foto'];
-                    $existingIds[] = $id;
-                    $existingFiles[$id] = $r['nama_file'];
-                }
-
-                $stmtUpdate = $conn->prepare("UPDATE mobil_foto SET tipe_foto=?, nama_file=?, urutan=? WHERE id_foto=?");
-                $stmtInsert = $conn->prepare("INSERT INTO mobil_foto (kode_mobil, tipe_foto, nama_file, urutan) VALUES (?, ?, ?, ?)");
-
-                $idsInRequest = [];
+            // ===================== FOTO UPDATE (ANDROID) =====================
+            if (!empty($fotoList) && $isAndroidRequest) {
                 $filesToDelete = [];
-
-                // Cek: apakah request membawa id_foto lama?
-                $hasExistingId = false;
-                foreach ($fotoList as $foto) {
-                    if (!empty($foto['id_foto'])) {
-                        $hasExistingId = true;
-                        break;
-                    }
-                }
 
                 foreach ($fotoList as $foto) {
                     $id = $foto['id_foto'] ?? null;
-                    $tipe = in_array($foto['tipe_foto'] ?? '', ['360', 'depan', 'belakang', 'samping', 'tambahan'])
-                        ? $foto['tipe_foto']
-                        : 'tambahan';
-                    $file = $foto['nama_file'] ?? '';
-                    $urut = (int) ($foto['urutan'] ?? 0);
+                    $tipe = $foto['tipe_foto'];
+                    $file = $foto['nama_file'];
+                    $urut = (int) $foto['urutan'];
+                    $oldFile = $foto['old_file'] ?? null;
 
-                    if ($id && in_array($id, $existingIds)) {
-                        // UPDATE baris lama
-                        $oldFile = $existingFiles[$id] ?? null;
-                        if ($oldFile && $file && $file !== $oldFile) {
+                    if ($id) {
+                        // ✅ UPDATE: Replace foto lama
+                        $stmt = $conn->prepare("UPDATE mobil_foto SET nama_file=?, urutan=? WHERE id_foto=?");
+                        $stmt->bind_param("sii", $file, $urut, $id);
+                        $stmt->execute();
+                        $stmt->close();
+
+                        // Tandai file lama untuk dihapus
+                        if ($oldFile && $oldFile !== $file) {
                             $filesToDelete[] = $oldFile;
                         }
-                        $stmtUpdate->bind_param("ssii", $tipe, $file, $urut, $id);
-                        $stmtUpdate->execute();
-                        $idsInRequest[] = $id;
                     } else {
-                        // INSERT baris baru
-                        $stmtInsert->bind_param("sssi", $kodeMobil, $tipe, $file, $urut);
-                        $stmtInsert->execute();
-                        $idsInRequest[] = $conn->insert_id;
+                        // ✅ INSERT: Foto baru (untuk foto tambahan)
+                        $stmt = $conn->prepare("INSERT INTO mobil_foto (kode_mobil, tipe_foto, nama_file, urutan) VALUES (?, ?, ?, ?)");
+                        $stmt->bind_param("sssi", $kodeMobil, $tipe, $file, $urut);
+                        $stmt->execute();
+                        $stmt->close();
                     }
                 }
 
-                // ⬇⬇⬇ HANYA HAPUS FOTO LAMA JIKA REQUEST MEMBAWA id_foto (artinya UI mengatur ulang list lengkap)
-                // if ($hasExistingId) {
-                //     $toDelete = array_diff($existingIds, $idsInRequest);
-                //     if (!empty($toDelete)) {
-                //         foreach ($toDelete as $idDel) {
-                //             if (!empty($existingFiles[$idDel])) {
-                //                 $filesToDelete[] = $existingFiles[$idDel];
-                //             }
-                //         }
-                //         $in = implode(',', array_map('intval', $toDelete));
-                //         $conn->query("DELETE FROM mobil_foto WHERE id_foto IN ($in)");
-                //     }
-                // }
-
-                $stmtUpdate->close();
-                $stmtInsert->close();
-
-                // hapus file fisik setelah DB commit
+                // Hapus file fisik setelah DB commit
                 $projectRoot = dirname(__DIR__);
                 foreach ($filesToDelete as $path) {
                     $filePath = parse_url($path, PHP_URL_PATH);
@@ -412,12 +410,13 @@ try {
                         $filePath = $path;
                     if (strpos($filePath, '/images/mobil/') === 0) {
                         $full = $projectRoot . $filePath;
-                        if (is_file($full))
+                        if (is_file($full)) {
                             @unlink($full);
+                            file_put_contents("debug_android.txt", "Deleted old file: $full\n", FILE_APPEND);
+                        }
                     }
                 }
             }
-
 
             $conn->commit();
 
@@ -425,7 +424,8 @@ try {
                 'success' => true,
                 'code' => 200,
                 'message' => 'Data mobil berhasil diperbarui.',
-                'kode_mobil' => $kodeMobil
+                'kode_mobil' => $kodeMobil,
+                'foto_processed' => count($fotoList)
             ]);
             exit;
         } catch (Exception $ex) {
@@ -450,9 +450,7 @@ try {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
-        // types: 3x s, 6x i (tahun,jarak,full_prize,uang_muka,tenor,angsuran), 6x s
         $types = str_repeat('s', 3) . str_repeat('i', 6) . str_repeat('s', 6);
-
         $params = [
             $types,
             $kodeMobilBaru,
@@ -472,7 +470,6 @@ try {
             $data['status']
         ];
         call_user_func_array([$stmt, 'bind_param'], refValues($params));
-
         $stmt->execute();
         $stmt->close();
 
@@ -490,7 +487,9 @@ try {
         if (!empty($fotoList)) {
             $stmt = $conn->prepare("INSERT INTO mobil_foto (kode_mobil, tipe_foto, nama_file, urutan) VALUES (?, ?, ?, ?)");
             foreach ($fotoList as $foto) {
-                $tipe = in_array($foto['tipe_foto'] ?? '', ['360', 'depan', 'belakang', 'samping', 'tambahan']) ? $foto['tipe_foto'] : 'tambahan';
+                $tipe = in_array($foto['tipe_foto'] ?? '', ['360', 'depan', 'belakang', 'samping', 'tambahan']) 
+                    ? $foto['tipe_foto'] 
+                    : 'tambahan';
                 $file = $foto['nama_file'] ?? '';
                 $urut = (int) ($foto['urutan'] ?? 0);
                 $stmt->bind_param("sssi", $kodeMobilBaru, $tipe, $file, $urut);

@@ -20,7 +20,7 @@ try {
         FROM mobil m
         LEFT JOIN mobil_foto mf 
             ON mf.kode_mobil = m.kode_mobil 
-            AND mf.urutan = 1   -- jadi foto urutan 1 sebagai thumbnail default
+            AND mf.tipe_foto = 'depan'   -- jadi foto urutan 1 sebagai thumbnail default
         ORDER BY m.created_at DESC;
     ";
 
@@ -42,14 +42,12 @@ try {
 
     echo json_encode([
         "code" => 200,
-        "success" => true,
         "data" => $data
     ]);
 
 } catch (Exception $e) {
     echo json_encode([
         "code" => 500,
-        "success" => false,
         "message" => $e->getMessage()
     ]);
 }
