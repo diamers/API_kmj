@@ -1,0 +1,107 @@
+Array
+(
+    [POST] => Array
+        (
+            [kode_user] => US001
+            [update] => 1
+            [kode_mobil] => MB00000008
+            [nama_mobil] => Honda New 
+            [tahun] => 2020
+            [jarak_tempuh] => 70000
+            [full_prize] => 90000
+            [tipe_kendaraan] => MPV
+            [bahan_bakar] => Bensin
+            [sistem_penggerak] => AWD (All Wheel Drive)
+            [warna_exterior] => gray
+            [warna_interior] => gray
+            [angsuran] => 2319000
+            [tenor] => 90
+            [uang_muka] => 90000
+            [fitur] => Array
+                (
+                    [0] => 15
+                )
+
+            [status] => available
+        )
+
+    [FILES] => Array
+        (
+            [foto_360] => Array
+                (
+                    [name] => images (5).jpg
+                    [full_path] => images (5).jpg
+                    [type] => image/jpeg
+                    [tmp_name] => C:\Users\Ananta Widayani\AppData\Local\Temp\phpEEDD.tmp
+                    [error] => 0
+                    [size] => 8819
+                )
+
+            [foto_depan] => Array
+                (
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
+                )
+
+            [foto_belakang] => Array
+                (
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
+                )
+
+            [foto_samping] => Array
+                (
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
+                )
+
+            [foto_tambahan] => Array
+                (
+                    [name] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [full_path] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [type] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [tmp_name] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [error] => Array
+                        (
+                            [0] => 4
+                        )
+
+                    [size] => Array
+                        (
+                            [0] => 0
+                        )
+
+                )
+
+        )
+
+    [REQUEST_METHOD] => POST
+)
