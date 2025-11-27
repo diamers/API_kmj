@@ -9,7 +9,7 @@ if ($query) {
 
     echo json_encode([
         "code" => 200,
-        "message" => "Data user berhasil diambil",
+        "message" => "Dat   a user berhasil diambil",
         "user_count" => (int)$result['user_count']
     ]);
 } else {
