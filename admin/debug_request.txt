@@ -2,24 +2,22 @@ Array
 (
     [POST] => Array
         (
-            [kode_user] => US001
-            [update] => 1
-            [kode_mobil] => MB00000008
-            [nama_mobil] => Honda New 
+            [nama_mobil] => Toyota 
             [tahun] => 2020
-            [jarak_tempuh] => 70000
-            [full_prize] => 90000
-            [tipe_kendaraan] => MPV
-            [bahan_bakar] => Bensin
-            [sistem_penggerak] => AWD (All Wheel Drive)
-            [warna_exterior] => gray
-            [warna_interior] => gray
-            [angsuran] => 2319000
-            [tenor] => 90
-            [uang_muka] => 90000
+            [jarak_tempuh] => 700
+            [full_prize] => 89
+            [tipe_kendaraan] => Sedan
+            [bahan_bakar] => Diesel
+            [sistem_penggerak] => RWD (Rear Wheel Drive)
+            [warna_exterior] => Putih
+            [warna_interior] => pink
+            [angsuran] => 80000000
+            [tenor] => 89
+            [uang_muka] => 90000000
             [fitur] => Array
                 (
-                    [0] => 15
+                    [0] => 8
+                    [1] => 12
                 )
 
             [status] => available
@@ -29,22 +27,22 @@ Array
         (
             [foto_360] => Array
                 (
-                    [name] => images (5).jpg
-                    [full_path] => images (5).jpg
-                    [type] => image/jpeg
-                    [tmp_name] => C:\Users\Ananta Widayani\AppData\Local\Temp\phpEEDD.tmp
-                    [error] => 0
-                    [size] => 8819
-                )
-
-            [foto_depan] => Array
-                (
                     [name] => 
                     [full_path] => 
                     [type] => 
                     [tmp_name] => 
                     [error] => 4
                     [size] => 0
+                )
+
+            [foto_depan] => Array
+                (
+                    [name] => images (5).jpg
+                    [full_path] => images (5).jpg
+                    [type] => image/jpeg
+                    [tmp_name] => C:\Users\Ananta Widayani\AppData\Local\Temp\php1A58.tmp
+                    [error] => 0
+                    [size] => 8819
                 )
 
             [foto_belakang] => Array

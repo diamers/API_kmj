@@ -61,3 +61,48 @@ NEW: foto_360 (360) - urutan=2
 Total processed: 1
 === ANDROID UPLOAD END ===
 
+=== ANDROID UPLOAD START ===
+Starting urutan from: 3
+Total processed: 0
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+Starting urutan from: 3
+Total processed: 0
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+NEW: foto_depan (depan) - urutan=1
+Total processed: 1
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+NEW: foto_depan (depan) - urutan=1
+Total processed: 1
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+Starting urutan from: 2
+Total processed: 0
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+Starting urutan from: 2
+Total processed: 0
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+NEW: foto_depan (depan) - urutan=1
+Total processed: 1
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+Starting urutan from: 2
+Total processed: 0
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+NEW: foto_depan (depan) - urutan=1
+Total processed: 1
+=== ANDROID UPLOAD END ===
+
