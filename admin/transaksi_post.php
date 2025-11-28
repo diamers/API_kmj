@@ -332,8 +332,8 @@ elseif ($action === 'update') {
     }
 
     // ID jaminan (sesuaikan dengan tabel jaminan milikmu)
-    $ID_JAMINAN_KTP      = 1;
-    $ID_JAMINAN_KK       = 2;
+    $ID_JAMINAN_KTP      = 2;
+    $ID_JAMINAN_KK       = 1;
     $ID_JAMINAN_REKENING = 3;
 
     $sqlJ = "INSERT INTO detail_jaminan (kode_transaksi, id_jaminan, keterangan)
