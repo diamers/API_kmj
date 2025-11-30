@@ -42,8 +42,10 @@ try {
     $updateMode = !empty($_POST['update']);
     $deleteMode = !empty($_POST['delete']);
 
-    $kodeMobil = $_POST['kode_mobil'] ?? '';
-    $kodeUser = $_SESSION['kode_user'] ?? 'US001';
+   $kodeMobil = $_POST['kode_mobil'] ?? '';
+$kodeUser  = $_SESSION['kode_user'] 
+          ?? ($_POST['kode_user'] ?? 'US001'); // fallback terakhir kalau bener2 belum login
+
 
     // ===================== DELETE MOBIL =====================
     if ($deleteMode) {
