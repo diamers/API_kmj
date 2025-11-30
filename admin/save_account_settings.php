@@ -1,12 +1,22 @@
 <?php
+// CORS Headers
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
+
+// Handle preflight request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 session_start();
 require __DIR__ . "/../shared/config.php";
 
-
-header('Content-Type: application/json');
-
-// Cek apakah user sudah login
-if (!isset($_SESSION['kode_user']) || !in_array($_SESSION['role'], ['owner', 'admin'])) {
+// Cek login
+if (!isset($_SESSION['kode_user'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit;
 }
@@ -35,7 +45,7 @@ try {
         throw new Exception('Username tidak boleh kosong');
     }
 
-    // Cek apakah username sudah digunakan user lain
+    // Cek username duplikat
     $checkUsername = "SELECT kode_user FROM users WHERE username = ? AND kode_user != ?";
     $stmt = $conn->prepare($checkUsername);
     $stmt->bind_param('ss', $username, $kode_user);
@@ -48,33 +58,56 @@ try {
     $avatar_url = null;
     if (!empty($profile_image)) {
         // Decode base64 image
-        $image_parts = explode(";base64,", $profile_image);
-        $image_base64 = base64_decode($image_parts[1]);
-        
-        // Generate unique filename
-        $filename = 'profile_' . $kode_user . '_' . time() . '.png';
-        $filepath = '../../uploads/profiles/' . $filename;
-        
-        // Buat folder jika belum ada
-        if (!file_exists('../../uploads/profiles/')) {
-            mkdir('../../uploads/profiles/', 0777, true);
-        }
-        
-        // Simpan file
-        if (file_put_contents($filepath, $image_base64)) {
-            $avatar_url = '/uploads/profiles/' . $filename;
+        if (preg_match('/^data:image\/(\w+);base64,/', $profile_image, $type)) {
+            $profile_image = substr($profile_image, strpos($profile_image, ',') + 1);
+            $type = strtolower($type[1]); // jpg, png, gif
+
+            if (!in_array($type, ['jpg', 'jpeg', 'png', 'gif'])) {
+                throw new Exception('Format gambar tidak valid');
+            }
+
+            $profile_image = str_replace(' ', '+', $profile_image);
+            $image_data = base64_decode($profile_image);
+
+            if ($image_data === false) {
+                throw new Exception('Base64 decode gagal');
+            }
+
+            // Path ke folder API_KMJ/images/user/
+            $upload_dir = '../images/user/';
             
-            // Hapus foto lama jika ada
-            $oldPhoto = "SELECT avatar_url FROM users WHERE kode_user = ?";
-            $stmt = $conn->prepare($oldPhoto);
-            $stmt->bind_param('s', $kode_user);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($result->num_rows > 0) {
-                $old = $result->fetch_assoc();
-                if (!empty($old['avatar_url']) && file_exists('../../' . $old['avatar_url'])) {
-                    unlink('../../' . $old['avatar_url']);
+            // Buat folder jika belum ada
+            if (!file_exists($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+
+            // Generate nama file unik
+            $filename = 'profil_' . strtolower(str_replace('-', '_', $kode_user)) . '_' . time() . '.' . $type;
+            $filepath = $upload_dir . $filename;
+
+            // Simpan file
+            if (file_put_contents($filepath, $image_data)) {
+                // Path relatif untuk disimpan di database (untuk diakses via URL)
+                $avatar_url = '/images/user/' . $filename;
+
+                // Hapus foto lama jika ada
+                $oldPhoto = "SELECT avatar_url FROM users WHERE kode_user = ?";
+                $stmt = $conn->prepare($oldPhoto);
+                $stmt->bind_param('s', $kode_user);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result->num_rows > 0) {
+                    $old = $result->fetch_assoc();
+                    if (!empty($old['avatar_url'])) {
+                        // Hapus dari folder API_KMJ
+                        $old_file = '../images/user/' . basename($old['avatar_url']);
+                        if (file_exists($old_file)) {
+                            unlink($old_file);
+                        }
+                    }
                 }
+            } else {
+                throw new Exception('Gagal menyimpan file gambar');
             }
         }
     }
@@ -133,7 +166,8 @@ try {
 
     echo json_encode([
         'success' => true,
-        'message' => 'Data akun berhasil diperbarui'
+        'message' => 'Data akun berhasil diperbarui',
+        'avatar_url' => $avatar_url
     ]);
 
 } catch (Exception $e) {
