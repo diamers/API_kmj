@@ -1,22 +1,24 @@
 Array
 (
     [kode_user] => US001
-    [nama_mobil] => Toyota Supra
-    [tahun] => 2025
-    [jarak_tempuh] => 200000
+    [update] => 1
+    [kode_mobil] => MB00000001
+    [nama_mobil] => Toyota Fortuner 2.4 
+    [tahun] => 2020
+    [jarak_tempuh] => 90
+    [full_prize] => 100000000
     [tipe_kendaraan] => SUV
-    [bahan_bakar] => Diesel
+    [bahan_bakar] => Bensin
     [sistem_penggerak] => FWD
-    [warna_exterior] => red
-    [warna_interior] => black
-    [angsuran] => 20000
-    [tenor] => 2
-    [uang_muka] => 222000
+    [warna_exterior] => Putih
+    [warna_interior] => gray
+    [angsuran] => 2319000
+    [tenor] => 90
+    [uang_muka] => 9000
     [fitur] => Array
         (
-            [0] => 1
-            [1] => 4
+            [0] => 7
         )
 
-    [status] => available
+    [status] => sold
 )

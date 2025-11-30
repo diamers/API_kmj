@@ -20,12 +20,17 @@ $action = $req['action'] ?? '';
 
 // ================== GET LIST ==================
 if ($action === 'list') {
-
+//tambah no_hp sama full_prize buat ditampilin di detail transaksi, tambah tenor,tipe pembayaran, angsuran buat credit
     $sql = "
       SELECT 
         t.kode_transaksi,
         t.nama_pembeli,
+        t.no_hp,
+        t.tipe_pembayaran,
         m.nama_mobil,
+        m.full_prize AS harga_asli, 
+        m.tenor, 
+        m.angsuran, 
         t.created_at AS tanggal,
         t.status,
         t.harga_akhir,
@@ -71,7 +76,6 @@ if ($action === 'detail') {
           t.created_at,
           t.status,
           t.note,
-
           m.nama_mobil,
           m.tahun_mobil,
           m.jenis_kendaraan AS tipe_mobil,
@@ -116,17 +120,20 @@ if ($action === 'detail') {
         ];
 
         while ($rowJ = $resJ->fetch_assoc()) {
-            $idJ = intval($rowJ['id_jaminan']);
+    $idJ = intval($rowJ['id_jaminan']);
 
-            // ⚠️ SESUAIKAN ANGKA2 INI DENGAN TABEL `jaminan` DI DB-MU
-            if ($idJ === 1) {
-                $jaminanFlags['ktp'] = 1;
-            } elseif ($idJ === 2) {
-                $jaminanFlags['kk'] = 1;
-            } elseif ($idJ === 3) {
-                $jaminanFlags['rekening'] = 1;
-            }
-        }
+    if ($idJ === 2) {
+        // id 2 = KTP
+        $jaminanFlags['ktp'] = 1;
+    } elseif ($idJ === 1) {
+        // id 1 = KK
+        $jaminanFlags['kk'] = 1;
+    } elseif ($idJ === 3) {
+        // id 3 = Buku Tabungan / Rekening
+        $jaminanFlags['rekening'] = 1;
+    }
+}
+
 
         $stmtJ->close();
 

@@ -1,0 +1,105 @@
+Array
+(
+    [POST] => Array
+        (
+            [nama_mobil] => Toyota 
+            [tahun] => 2020
+            [jarak_tempuh] => 700
+            [full_prize] => 89
+            [tipe_kendaraan] => Sedan
+            [bahan_bakar] => Diesel
+            [sistem_penggerak] => RWD (Rear Wheel Drive)
+            [warna_exterior] => Putih
+            [warna_interior] => pink
+            [angsuran] => 80000000
+            [tenor] => 89
+            [uang_muka] => 90000000
+            [fitur] => Array
+                (
+                    [0] => 8
+                    [1] => 12
+                )
+
+            [status] => available
+        )
+
+    [FILES] => Array
+        (
+            [foto_360] => Array
+                (
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
+                )
+
+            [foto_depan] => Array
+                (
+                    [name] => images (5).jpg
+                    [full_path] => images (5).jpg
+                    [type] => image/jpeg
+                    [tmp_name] => C:\Users\Ananta Widayani\AppData\Local\Temp\php1A58.tmp
+                    [error] => 0
+                    [size] => 8819
+                )
+
+            [foto_belakang] => Array
+                (
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
+                )
+
+            [foto_samping] => Array
+                (
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
+                )
+
+            [foto_tambahan] => Array
+                (
+                    [name] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [full_path] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [type] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [tmp_name] => Array
+                        (
+                            [0] => 
+                        )
+
+                    [error] => Array
+                        (
+                            [0] => 4
+                        )
+
+                    [size] => Array
+                        (
+                            [0] => 0
+                        )
+
+                )
+
+        )
+
+    [REQUEST_METHOD] => POST
+)

@@ -61,13 +61,33 @@ try {
     }
 
     // ============================
-    // 2. AMBIL FITUR
-    // ============================
+// 2. AMBIL FITUR (JOIN NAMA)
+// ============================
     $fitur = [];
-    $resFitur = $conn->query("SELECT id_fitur FROM mobil_fitur WHERE kode_mobil = '$kode'");
+
+    $stmtF = $conn->prepare("
+    SELECT 
+        mf.id_fitur,
+        f.nama_fitur,
+        f.id_kategori,
+        k.nama_kategori
+    FROM mobil_fitur mf
+    JOIN fitur f ON f.id_fitur = mf.id_fitur
+    JOIN kategori k ON k.id_kategori = f.id_kategori
+    WHERE mf.kode_mobil = ?
+    ORDER BY f.id_kategori, f.nama_fitur
+");
+    $stmtF->bind_param("s", $kode);
+    $stmtF->execute();
+    $resFitur = $stmtF->get_result();
+
     while ($row = $resFitur->fetch_assoc()) {
-        $fitur[] = (int) $row['id_fitur'];
+        $row['id_fitur'] = (int) $row['id_fitur'];
+        $row['id_kategori'] = (int) $row['id_kategori'];
+        $fitur[] = $row;
     }
+    $stmtF->close();
+
 
     // ============================
     // 3. AMBIL FOTO
