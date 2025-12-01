@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "kmjshowrooms";
+$dbname = "kmjshowroom4";
 $port = 3306;
 
 header('Content-Type: application/json');

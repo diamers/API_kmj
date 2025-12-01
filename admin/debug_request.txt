@@ -2,22 +2,23 @@ Array
 (
     [POST] => Array
         (
-            [nama_mobil] => Toyota 
-            [tahun] => 2020
-            [jarak_tempuh] => 700
-            [full_prize] => 89
-            [tipe_kendaraan] => Sedan
+            [nama_mobil] => BMW 
+            [tahun] => 2021
+            [jarak_tempuh] => 765
+            [full_prize] => 876678000
+            [tipe_kendaraan] => SUV
             [bahan_bakar] => Diesel
             [sistem_penggerak] => RWD (Rear Wheel Drive)
-            [warna_exterior] => Putih
-            [warna_interior] => pink
-            [angsuran] => 80000000
-            [tenor] => 89
-            [uang_muka] => 90000000
+            [warna_exterior] => red
+            [warna_interior] => black
+            [angsuran] => 20500000
+            [tenor] => 13
+            [uang_muka] => 10000000
             [fitur] => Array
                 (
-                    [0] => 8
+                    [0] => 5
                     [1] => 12
+                    [2] => 20
                 )
 
             [status] => available
@@ -37,12 +38,12 @@ Array
 
             [foto_depan] => Array
                 (
-                    [name] => images (5).jpg
-                    [full_path] => images (5).jpg
-                    [type] => image/jpeg
-                    [tmp_name] => C:\Users\Ananta Widayani\AppData\Local\Temp\php1A58.tmp
+                    [name] => Pamflet Open PO X-Banner.png
+                    [full_path] => Pamflet Open PO X-Banner.png
+                    [type] => image/png
+                    [tmp_name] => C:\Users\ACER\AppData\Local\Temp\phpE937.tmp
                     [error] => 0
-                    [size] => 8819
+                    [size] => 5922267
                 )
 
             [foto_belakang] => Array
