@@ -1,4 +1,9 @@
 <?php
+// ✅ PERBAIKAN 1: Pastikan session dimulai agar $_SESSION['kode_user'] terbaca
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require __DIR__ . "/../shared/config.php";
 require_once __DIR__ . "/../shared/path.php";
 header("Content-Type: application/json");
@@ -6,14 +11,34 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
+// ✅ TAMBAHAN: Parse JSON untuk request biasa (mobile)
 $input = json_decode(file_get_contents('php://input'), true);
 if ($input)
     $_POST = $input;
 
+// ✅ TAMBAHAN: Parse multipart/form-data untuk web (saat ada file upload)
+// Ketika ada $_FILES, PHP tidak otomatis parse field biasa ke $_POST
+if (!empty($_FILES) && empty($_POST['nama_mobil'])) {
+    // Coba ambil dari php://input boundary parsing
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    
+    if (strpos($contentType, 'multipart/form-data') !== false) {
+        // Ambil semua field dari $_REQUEST (kombinasi GET, POST, COOKIE)
+        // Karena PHP sudah parse sebagian ke $_REQUEST saat ada multipart
+        foreach ($_REQUEST as $key => $value) {
+            if (!isset($_POST[$key])) {
+                $_POST[$key] = $value;
+            }
+        }
+    }
+}
+
 file_put_contents("debug_request.txt", print_r([
     'POST' => $_POST,
     'FILES' => $_FILES,
-    'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD']
+    'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'],
+    'CONTENT_TYPE' => $_SERVER['CONTENT_TYPE'] ?? 'not set',
+    '_REQUEST' => $_REQUEST // tambahan untuk debug
 ], true));
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -45,6 +70,14 @@ try {
     if (!$kodeUser) {
         $kodeUser = $_POST['kode_user'] ?? null;
     }
+    
+    // ✅ TAMBAHAN: Debug kode_user
+    file_put_contents("debug_kode_user.txt", print_r([
+        'kodeUser_from_SESSION' => $_SESSION['kode_user'] ?? 'KOSONG',
+        'kodeUser_from_POST' => $_POST['kode_user'] ?? 'KOSONG',
+        'kodeUser_final' => $kodeUser ?? 'KOSONG',
+        'all_POST' => $_POST
+    ], true));
     
     if (!$kodeUser && !$deleteMode) {
         throw new Exception("User belum login. Silakan login terlebih dahulu.");

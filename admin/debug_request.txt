@@ -103,4 +103,11 @@ Array
         )
 
     [REQUEST_METHOD] => POST
+    [CONTENT_TYPE] => multipart/form-data; boundary=----WebKitFormBoundaryFhRcn4t9y7WQlTGs
+    [_REQUEST] => Array
+        (
+            [delete] => 1
+            [kode_mobil] => MB00000018
+        )
+
 )
