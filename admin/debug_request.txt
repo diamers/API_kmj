@@ -2,22 +2,24 @@ Array
 (
     [POST] => Array
         (
-            [nama_mobil] => Toyota 
+            [kode_user] => US001
+            [update] => 1
+            [kode_mobil] => MB00000007
+            [nama_mobil] => s
             [tahun] => 2020
-            [jarak_tempuh] => 700
-            [full_prize] => 89
-            [tipe_kendaraan] => Sedan
-            [bahan_bakar] => Diesel
-            [sistem_penggerak] => RWD (Rear Wheel Drive)
-            [warna_exterior] => Putih
-            [warna_interior] => pink
-            [angsuran] => 80000000
-            [tenor] => 89
-            [uang_muka] => 90000000
+            [jarak_tempuh] => 12
+            [full_prize] => 12
+            [tipe_kendaraan] => SUV
+            [bahan_bakar] => Bensin
+            [sistem_penggerak] => FWD (Front Wheel Drive)
+            [warna_exterior] => black
+            [warna_interior] => red
+            [angsuran] => 16
+            [tenor] => 4
+            [uang_muka] => 4
             [fitur] => Array
                 (
-                    [0] => 8
-                    [1] => 12
+                    [0] => 12
                 )
 
             [status] => available
@@ -37,12 +39,12 @@ Array
 
             [foto_depan] => Array
                 (
-                    [name] => images (5).jpg
-                    [full_path] => images (5).jpg
-                    [type] => image/jpeg
-                    [tmp_name] => C:\Users\Ananta Widayani\AppData\Local\Temp\php1A58.tmp
-                    [error] => 0
-                    [size] => 8819
+                    [name] => 
+                    [full_path] => 
+                    [type] => 
+                    [tmp_name] => 
+                    [error] => 4
+                    [size] => 0
                 )
 
             [foto_belakang] => Array
