@@ -106,3 +106,13 @@ NEW: foto_depan (depan) - urutan=1
 Total processed: 1
 === ANDROID UPLOAD END ===
 
+=== ANDROID UPLOAD START ===
+NEW: foto_depan (depan) - urutan=1
+Total processed: 1
+=== ANDROID UPLOAD END ===
+
+=== ANDROID UPLOAD START ===
+NEW: foto_depan (depan) - urutan=1
+Total processed: 1
+=== ANDROID UPLOAD END ===
+
