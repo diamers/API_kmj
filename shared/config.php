@@ -1,19 +1,32 @@
 <?php
-$host = "127.0.0.1";
-$user = "admin";
-$pass = "1234";
-$dbname = "maverick_kmj";
-$port = 8889;
+header("Access-Control-Allow-Origin: http://localhost");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// kalau browser kirim preflight OPTIONS, balas kosong saja
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$host = "localhost";
+$user = "root";
+$pass = "";
+$dbname = "kmjshowrooms";
+$port = 3306;
 
 header('Content-Type: application/json');
 
 $conn = new mysqli($host, $user, $pass, $dbname, $port);
 
+
 if ($conn->connect_error) {
     die(json_encode(["code" => 500, "message" => "DB gagal: " . $conn->connect_error]));
 }
 
-define("BASE_URL", "http://localhost:8888/api_kmj");
+define("BASE_URL", "http://localhost:80/API_kmj");
 
 try {
     $pdo = new PDO(
