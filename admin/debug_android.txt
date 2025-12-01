@@ -342,3 +342,80 @@ Deleted: C:\laragon\www\API_kmj/images/mobil/mobil_692c5982ac3a34.48095617.jpg
 Total photos to process: 0
 === END ===
 
+=== ANDROID UPLOAD START ===
+NEW UTAMA: 360 (urutan=1)
+NEW UTAMA: depan (urutan=2)
+Total photos to process: 2
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW UTAMA: 360 (urutan=1)
+NEW UTAMA: depan (urutan=2)
+Total photos to process: 2
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW TAMBAHAN: slot=0, urutan=5
+NEW TAMBAHAN: slot=1, urutan=6
+Total photos to process: 2
+=== END ===
+
+=== ANDROID UPLOAD START ===
+Total photos to process: 0
+=== END ===
+
+=== ANDROID UPLOAD START ===
+Total photos to process: 0
+=== END ===
+
+=== ANDROID UPLOAD START ===
+Total photos to process: 0
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW TAMBAHAN: slot=0, urutan=5
+NEW TAMBAHAN: slot=1, urutan=6
+NEW TAMBAHAN: slot=2, urutan=7
+Total photos to process: 3
+=== END ===
+
+=== ANDROID UPLOAD START ===
+REPLACE TAMBAHAN: slot=5, urutan=10, id=99
+Total photos to process: 1
+=== END ===
+
+Deleted: C:\laragon\www\API_kmj/images/mobil/mobil_692d763da2b5a2.20654389.jpg
+=== ANDROID UPLOAD START ===
+NEW TAMBAHAN: slot=0, urutan=5
+Total photos to process: 1
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW UTAMA: depan (urutan=2)
+Total photos to process: 1
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW UTAMA: depan (urutan=2)
+Total photos to process: 1
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW TAMBAHAN: slot=0, urutan=5
+NEW TAMBAHAN: slot=1, urutan=6
+NEW TAMBAHAN: slot=2, urutan=7
+NEW TAMBAHAN: slot=3, urutan=8
+NEW TAMBAHAN: slot=4, urutan=9
+NEW TAMBAHAN: slot=5, urutan=10
+Total photos to process: 6
+=== END ===
+
+=== ANDROID UPLOAD START ===
+NEW UTAMA: belakang (urutan=3)
+Total photos to process: 1
+=== END ===
+
+=== ANDROID UPLOAD START ===
+Total photos to process: 0
+=== END ===
+
