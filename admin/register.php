@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-header("Access-Control-Allow-Origin: *"); 
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Credentials: true");
@@ -140,7 +140,8 @@ if ($provider_type != "local") {
     $avatar_url = !empty($data["profile_url"]) ? $data["profile_url"] : null;
 } elseif (isset($_FILES["avatar_file"]["name"]) && $_FILES["avatar_file"]["error"] === 0) {
     $dir = __DIR__ . "/../../images/user/";
-    if (!file_exists($dir)) mkdir($dir, 0777, true);
+    if (!file_exists($dir))
+        mkdir($dir, 0777, true);
 
     $filename = time() . "_" . basename($_FILES["avatar_file"]["name"]);
     $target = $dir . $filename;
@@ -148,10 +149,17 @@ if ($provider_type != "local") {
     if (move_uploaded_file($_FILES["avatar_file"]["tmp_name"], $target)) {
         list($width, $height, $type) = getimagesize($target);
         switch ($type) {
-            case IMAGETYPE_JPEG: $srcImg = imagecreatefromjpeg($target); break;
-            case IMAGETYPE_PNG: $srcImg = imagecreatefrompng($target); break;
-            case IMAGETYPE_WEBP: $srcImg = imagecreatefromwebp($target); break;
-            default: $srcImg = null;
+            case IMAGETYPE_JPEG:
+                $srcImg = imagecreatefromjpeg($target);
+                break;
+            case IMAGETYPE_PNG:
+                $srcImg = imagecreatefrompng($target);
+                break;
+            case IMAGETYPE_WEBP:
+                $srcImg = imagecreatefromwebp($target);
+                break;
+            default:
+                $srcImg = null;
         }
 
         if ($srcImg) {
@@ -161,11 +169,15 @@ if ($provider_type != "local") {
                 imagealphablending($dstImg, false);
                 imagesavealpha($dstImg, true);
             }
-            imagecopyresampled($dstImg, $srcImg, 0,0,0,0,$newSize,$newSize,$width,$height);
-            if ($type == IMAGETYPE_JPEG) imagejpeg($dstImg, $target, 90);
-            if ($type == IMAGETYPE_PNG) imagepng($dstImg, $target);
-            if ($type == IMAGETYPE_WEBP) imagewebp($dstImg, $target, 90);
-            imagedestroy($srcImg); imagedestroy($dstImg);
+            imagecopyresampled($dstImg, $srcImg, 0, 0, 0, 0, $newSize, $newSize, $width, $height);
+            if ($type == IMAGETYPE_JPEG)
+                imagejpeg($dstImg, $target, 90);
+            if ($type == IMAGETYPE_PNG)
+                imagepng($dstImg, $target);
+            if ($type == IMAGETYPE_WEBP)
+                imagewebp($dstImg, $target, 90);
+            imagedestroy($srcImg);
+            imagedestroy($dstImg);
         }
         $avatar_url = "/images/user/" . $filename;
     }
@@ -177,8 +189,10 @@ if (!$avatar_url) {
         $avatar_url = $adminPics[array_rand($adminPics)];
     } else {
         $userPics = [
-            "/images/user/profil_user_1.png","/images/user/profil_user_2.png",
-            "/images/user/profil_user_3.png","/images/user/profil_user_4.png",
+            "/images/user/profil_user_1.png",
+            "/images/user/profil_user_2.png",
+            "/images/user/profil_user_3.png",
+            "/images/user/profil_user_4.png",
             "/images/user/profil_user_5.png"
         ];
         $avatar_url = $userPics[array_rand($userPics)];
@@ -194,9 +208,19 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param(
     "sssssssssssii",
-    $kode_user, $username, $email, $hashed, $full_name,
-    $role, $provider_type, $provider_id,
-    $no_telp, $alamat, $avatar_url, $email_verified, $aktif
+    $kode_user,
+    $username,
+    $email,
+    $hashed,
+    $full_name,
+    $role,
+    $provider_type,
+    $provider_id,
+    $no_telp,
+    $alamat,
+    $avatar_url,
+    $email_verified,
+    $aktif
 );
 
 if ($stmt->execute()) {
