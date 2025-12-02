@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $host = "localhost";
 $user = "root";
 $pass = "";
-$dbname = "kmjshowrooms";
+$dbname = "kmjshowroom4";
 $port = 3306;
 
 header('Content-Type: application/json');
@@ -26,7 +26,7 @@ if ($conn->connect_error) {
     die(json_encode(["code" => 500, "message" => "DB gagal: " . $conn->connect_error]));
 }
 
-define("BASE_URL", "http://localhost:80/API_kmj");
+define("BASE_URL", "http://192.168.1.41:80/API_kmj");
 
 try {
     $pdo = new PDO(

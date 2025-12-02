@@ -1,0 +1,12 @@
+Array
+(
+    [kodeUser_from_SESSION] => US002
+    [kodeUser_from_POST] => KOSONG
+    [kodeUser_final] => US002
+    [all_POST] => Array
+        (
+            [delete] => 1
+            [kode_mobil] => MB00000018
+        )
+
+)
