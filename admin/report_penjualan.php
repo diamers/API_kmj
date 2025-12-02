@@ -129,7 +129,10 @@ try {
     }
 
     $jumlahLaporan = count($laporan);
-    $rataTransaksi = $jumlahLaporan > 0 ? $totalTransaksiAll / $jumlahLaporan : 0;
+    $rataTransaksi = $totalTransaksiAll > 0
+    ? $totalPendapatanAll / $totalTransaksiAll
+    : 0;
+
 
     $data = [
         'ringkasan' => [
