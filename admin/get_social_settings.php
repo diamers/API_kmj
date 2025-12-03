@@ -1,13 +1,7 @@
 <?php
-session_start();
 require __DIR__ . "/../shared/config.php";
 
 header('Content-Type: application/json');
-
-if (!isset($_SESSION['kode_user'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
-}
 
 try {
     $query = "SELECT whatsapp, instagram_url, facebook_url, tiktok_url, youtube_url 

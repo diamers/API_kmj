@@ -13,21 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 session_start();
+
 require __DIR__ . "/../shared/config.php";
-
-// Debug: Log session info
-error_log("Session kode_user: " . ($_SESSION['kode_user'] ?? 'tidak ada'));
-error_log("Session role: " . ($_SESSION['role'] ?? 'tidak ada'));
-
-// Cek apakah user sudah login
-if (!isset($_SESSION['kode_user'])) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Unauthorized access. Silakan login terlebih dahulu.',
-        'debug' => 'Session kode_user tidak ditemukan'
-    ]);
-    exit;
-}
 
 try {
     // Ambil data dari tabel showroom_general
