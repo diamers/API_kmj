@@ -58,7 +58,7 @@ try {
 
   // ========== BAR CHART: jumlah mobil per merk ==========
   $sqlMerk = "
-    SELECT TRIM(SUBSTRING_INDEX(nama_mobil, ' ', 1)) AS merk,
+    SELECT TRIM(SUBSTRING_INDEX(jenis_kendaraan, ' ', 1)) AS merk,
            COUNT(*) AS total
     FROM mobil
     GROUP BY merk

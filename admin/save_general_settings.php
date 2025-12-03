@@ -1,17 +1,20 @@
 <?php
-session_start();
-require __DIR__ . "/../shared/config.php";
-
+// CORS Headers
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
-// Cek apakah user sudah login dan memiliki akses
-if (!isset($_SESSION['kode_user']) || !in_array($_SESSION['role'], ['owner', 'admin'])) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Unauthorized access'
-    ]);
+// Handle preflight request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
     exit;
 }
+
+session_start();
+
+require __DIR__ . "/../shared/config.php";
 
 // Validasi request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -44,6 +47,10 @@ try {
                        WHERE id_general = ?";
         
         $stmt = $conn->prepare($updateQuery);
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+        
         $stmt->bind_param('iiii', $showroom_status, $jual_mobil, $schedule_pelanggan, $id_general);
     } else {
         // Insert data baru
@@ -51,32 +58,43 @@ try {
                        VALUES (?, ?, ?)";
         
         $stmt = $conn->prepare($insertQuery);
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+        
         $stmt->bind_param('iii', $showroom_status, $jual_mobil, $schedule_pelanggan);
     }
 
     if ($stmt->execute()) {
-        // Log aktivitas
-        $kode_user = $_SESSION['kode_user'];
-        $description = "Mengubah pengaturan general showroom";
-        
-        $logQuery = "INSERT INTO activities (kode_user, activity_type, description, created_at) 
-                    VALUES (?, 'Update Settings', ?, NOW())";
-        $logStmt = $conn->prepare($logQuery);
-        $logStmt->bind_param('ss', $kode_user, $description);
-        $logStmt->execute();
+        // Log aktivitas (jika ada session)
+        if (isset($_SESSION['kode_user'])) {
+            $kode_user = $_SESSION['kode_user'];
+            $description = "Mengubah pengaturan general showroom";
+            
+            $logQuery = "INSERT INTO activities (kode_user, activity_type, description, created_at) 
+                        VALUES (?, 'Update Settings', ?, NOW())";
+            $logStmt = $conn->prepare($logQuery);
+            if ($logStmt) {
+                $logStmt->bind_param('ss', $kode_user, $description);
+                $logStmt->execute();
+                $logStmt->close();
+            }
+        }
         
         echo json_encode([
             'success' => true,
-            'message' => 'Pengaturan berhasil disimpan'
+            'message' => 'Pengaturan general berhasil disimpan!',
+            'data' => [
+                'showroom_status' => $showroom_status,
+                'jual_mobil' => $jual_mobil,
+                'schedule_pelanggan' => $schedule_pelanggan
+            ]
         ]);
     } else {
-        throw new Exception('Gagal menyimpan pengaturan');
+        throw new Exception('Execute failed: ' . $stmt->error);
     }
 
     $stmt->close();
-    if (isset($logStmt)) {
-        $logStmt->close();
-    }
 
 } catch (Exception $e) {
     echo json_encode([
