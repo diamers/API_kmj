@@ -27,6 +27,7 @@ try {
             m.uang_muka AS dp,
             m.tenor,
             m.status,
+            m.sistem_penggerak,
             mf.nama_file AS foto
         FROM mobil m
         LEFT JOIN mobil_foto mf 
