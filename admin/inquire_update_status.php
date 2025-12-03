@@ -29,12 +29,7 @@ if (!$id_inquire || !$status) {
     send(400, 'Data tidak lengkap');
 }
 
-// mapping UI -> DB
-if ($status === 'closed') {
-    $status = 'canceled';
-}
-
-if (!in_array($status, ['pending','responded','canceled'], true)) {
+if (!in_array($status, ['pending','responded','closed','canceled'], true)) {
     send(400, 'Status tidak valid');
 }
 

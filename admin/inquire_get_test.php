@@ -1,10 +1,13 @@
 <?php
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
-require_once __DIR__ . '/../shared/config.php';
+require_once __DIR__ . '/../shared/config.php';   // pastikan path ini benar
+// shared/config.php harus nge-define $conn (mysqli)
 
-// helper untuk error
-function respond($code, $message = '', $data = null) {
+function respond(int $code, string $message = '', $data = null)
+{
+    http_response_code($code);
+
     $res = ['code' => $code];
     if ($message !== '') {
         $res['message'] = $message;
@@ -17,71 +20,79 @@ function respond($code, $message = '', $data = null) {
     exit;
 }
 
-// Hanya GET
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    respond(400, "Method not allowed (GET only)");
-}
-
+// =========================
+// 1) Ambil filter status (optional)
+// =========================
 $status = $_GET['status'] ?? '';
+$status = trim($status);
 
-// UI → DB mapping
-if ($status === 'closed') {
-    $status = 'canceled';
-}
-
+// =========================
+/*
+   2) Query utama:
+      - ambil data dari tabel inquire (alias i)
+      - join ke tabel user (alias u) → untuk nama & email
+      - join ke tabel mobil (alias m) → untuk nama_mobil
+*/
+// =========================
 $sql = "
     SELECT
         i.id_inquire,
         i.kode_user,
         i.kode_mobil,
-        i.uji_beli,
-        i.jenis_janji,
         i.tanggal,
         i.waktu,
         i.no_telp,
         i.note,
         i.status,
-        u.email AS email_user
-    FROM inquire i
-    LEFT JOIN users u ON u.kode_user = i.kode_user
-    WHERE 1
+        i.uji_beli,
+        i.jenis_janji,
+        u.full_name AS nama_user,
+        u.email     AS email_user,
+        m.nama_mobil
+    FROM inquire AS i
+    LEFT JOIN users AS u
+        ON u.kode_user = i.kode_user
+    LEFT JOIN mobil AS m
+        ON m.kode_mobil = i.kode_mobil
 ";
 
 $params = [];
 $types  = '';
 
-if ($status && in_array($status, ['pending','responded','canceled'], true)) {
-    $sql    .= " AND i.status = ?";
-    $types  .= 's';
+// daftar status yang diizinkan untuk filter
+$allowedStatus = ['pending', 'responded', 'closed', 'canceled'];
+
+if ($status !== '' && $status !== 'all') {
+    if (!in_array($status, $allowedStatus, true)) {
+        respond(400, 'Status filter tidak valid');
+    }
+
+    $sql .= " WHERE i.status = ? ";
     $params[] = $status;
+    $types   .= "s";
 }
 
-$sql .= " ORDER BY i.id_inquire DESC";
+//urutkan dari apa hayo? based on id lah -nuril imoet
+$sql .= " ORDER BY i.id_inquire DESC ";
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    respond(400, "Query prepare error: " . $conn->error);
+    respond(500, 'Gagal prepare query: ' . $conn->error);
 }
 
-if ($types !== '') {
+if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
 }
 
-$stmt->execute();
-$result = $stmt->get_result();
-
-$data = [];
-while ($row = $result->fetch_assoc()) {
-    // DB -> UI mapping
-    if ($row['status'] === 'canceled') {
-        $row['status'] = 'closed';
-    }
-    $data[] = $row;
+if (!$stmt->execute()) {
+    respond(500, 'Gagal eksekusi query: ' . $stmt->error);
 }
 
-// ✅ SUCCESS RESPONSE (tanpa message OK)
-echo json_encode([
-    'code' => 200,
-    'data' => $data
-]);
-exit;
+$result = $stmt->get_result();
+$data   = [];
+
+while ($row = $result->fetch_assoc()) {
+    $data[] = $row;   // kirim apa adanya: pending / responded / closed / canceled
+}
+
+respond(200, '', $data);
