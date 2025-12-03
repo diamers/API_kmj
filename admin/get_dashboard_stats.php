@@ -18,7 +18,7 @@ try {
         FROM transaksi 
         WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
         AND YEAR(created_at) = YEAR(CURRENT_DATE())
-        AND status = 'selesai'
+        AND status = 'completed'
     ");
     $stmt->execute();
     $totalTransaksi = (int) $stmt->fetch(PDO::FETCH_ASSOC)["total_transaksi"];
@@ -29,7 +29,7 @@ try {
         FROM transaksi
         WHERE MONTH(created_at) = MONTH(CURRENT_DATE())
         AND YEAR(created_at) = YEAR(CURRENT_DATE())
-        AND status = 'selesai'
+        AND status = 'completed'
     ");
     $stmt->execute();
 
